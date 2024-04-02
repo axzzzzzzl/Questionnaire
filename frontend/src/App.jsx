@@ -1,35 +1,276 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState, useEffect, useRef } from "react";
+import { Layout, Input, Modal, Divider, ConfigProvider, Tooltip } from "antd";
+import { UpSquareFilled, EditFilled } from "@ant-design/icons";
+import styled from "@emotion/styled";
+import './App.css';
+import { LeftSide } from "./LeftSide";
+import { QuestionList } from "./QuestionList";
+import { SingleChoice } from "./SingleChoice";
+// import { useNavigate } from "react-router-dom";
+// import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+// export const DivRefContext = createContext();
 
-function App() {
-  const [count, setCount] = useState(0)
+const { Header, Content, Footer, Sider } = Layout;
+const { TextArea } = Input;
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+const Questionnaire = () => {
+    const [editorStatus, setEditorStatus] = useState("NotEdit");//是否在编辑
+    const [editorType, setEditorType] = useState(null);//编辑题目的类型
+    const [ques_no, setQuesno] = useState(0);//
+
+    const [questionnaireTitle, setquestionnaireTitle] = useState("");
+    const [description, setDescription] = useState("");
+    const [questionList, setQuestionList] = useState([]);
+    // var id = 1;
+    // const [hovering, setHovering] = useState(false);
+
+    const listRef = useRef(null);
+
+    useEffect(() => {
+      if(editorType === "SingleChoice"){
+        const current = listRef.current;
+        current.scrollTop = current.scrollHeight;
+      }
+    },[editorType])
+
+
+    // const generateId = () => {
+    //     return ++id;
+    // }
+
+    function generateKey() {
+        return Number(Math.random().toString().slice(3, 8) + Date.now()).toString(36);
+    }
+
+    const currSingleChoiceQues = {
+        no: generateKey(),
+        title: "",
+        type: 0,
+        remarks: null,
+        isNecessary: false,
+        option: [
+          { no: 1, text: "" },
+          { no: 2, text: "" },
+        ],
+    };
+    const currMultipleChoiceQues = {
+        no: generateKey(),
+        title: "",
+        type: 1,
+        remarks: null,
+        isNecessary: false,
+        option: [
+          { no: 1, text: "" },
+          { no: 2, text: "" },
+        ],
+    };
+    const currSingleLineTextQues = {
+        no: generateKey(),
+        type: 2,
+        title: null,
+        isNecessary: false,
+        remarks: null,
+    };
+
+    const onFinish = () => {
+        const questionnaire = {
+            title: questionnaireTitle,
+            description: description,
+            id: generateKey(),
+            questions: questionList,
+        };
+        // Modal.info({
+        //     title: "Questionnaire:   ",
+        //     content: JSON.stringify(questionnaire),
+        //     okText: "确定",
+        //   });
+        alert("Questionnaire:   " + JSON.stringify(questionnaire, null, 2))
+    };
+
+    return (
+      <ConfigProvider
+          theme={{
+              token: {
+              colorPrimary: '#01bd78',
+              borderRadius: 2,
+              },
+          }}
+      >
+        <Layout style={{minHeight: '100vh', textAlign: "center", background: "#eee"}}>
+          <Sider
+            style={{
+              background: "#eee"
+            }}
+            width="232px"
+          >
+            <LeftSide 
+              editorStatus={editorStatus}
+              setEditorStatus={setEditorStatus}
+              editorType={editorType}
+              setEditorType={setEditorType}
+              ques_no={ques_no}
+              setQuesno={setQuesno}
+            />
+          </Sider>
+          {/* <Layout style={{ minHeight: '100vh', background: "#eee" }}> */}
+            <QuestionnaireContent ref={listRef}>
+              <div
+                style={{
+                  marginTop: "10px",
+                  textAlign: "center",
+                  overflow: "auto",
+                  // marginRight: "10px",
+                  // padding: "20px 0px",
+                  // background: "skyblue"
+                }}
+              >
+                <ConfigProvider
+                  theme={{
+                    token: {
+                      colorBorder: "transparent",
+                    }
+                  }}
+                >
+                  <QuestionnaireTitle>
+                    <InputTitle
+                      placeholder="问卷标题"
+                      value={questionnaireTitle}
+                      onChange={(e) => {
+                        setquestionnaireTitle(e.target.value);
+                      }}
+                    />
+                  </QuestionnaireTitle>
+                  <QuestionnaireDescription>
+                    <InputDescription
+                      autoSize
+                      placeholder="问卷说明"
+                      value={description}
+                      onChange={(e) => {
+                        setDescription(e.target.value);
+                      }}
+                    />
+                  </QuestionnaireDescription>
+                </ConfigProvider>
+                <Divider style={{ border: '1px solid #01bd78', marginTop: '5px' }} />
+              </div>
+                {
+                    editorStatus === "NotEdit" && editorType === null && questionList.length === 0 &&
+                    <QuesitonnairePageText>
+                        <EditFilled style={{color: "#01bd78", fontSize: "40px", margin: "70px 0 30px 0"}}/>
+                        您还没有添加问题，请点击左侧问题控件开始出题吧。
+                    </QuesitonnairePageText>
+                }
+                {/* <div>{JSON.stringify(currSingleChoiceQues, null, 2)}</div>
+                <div>list: {JSON.stringify(questionList, null, 2)}</div>
+                <div>title: {questionnaireTitle}</div>
+                <div>editorStatus: {editorStatus}</div>
+                <div>editorType: {editorType}</div> */}
+
+                <QuestionList
+                  questionList={questionList}
+                  setQuestionList={setQuestionList}
+                  editorStatus={editorStatus}
+                  setEditorStatus={setEditorStatus}
+                  editorType={editorType}
+                  setEditorType={setEditorType}
+                //   isUpdate={isUpdate}
+                //   setIsUpdate={setIsUpdate}
+                ></QuestionList>
+
+                <div style={{background: '#eee'}}>
+                    {editorType === "SingleChoice"   && 
+                    <SingleChoice
+                      questionList={questionList}
+                      setQuestionList={setQuestionList}
+                      editorStatus={editorStatus}
+                      setEditorStatus={setEditorStatus}
+                      editorType={editorType}
+                      setEditorType={setEditorType}
+                      currQues={currSingleChoiceQues}
+                    ></SingleChoice>
+                    }
+                    {editorType === "MultipleChoice" && <p>多选题</p>}
+                    {editorType === "SingleLineText" && <p>文本题</p>}
+                    {/* {editorType === null && <p>null</p>} */}
+                </div>
+              
+            </QuestionnaireContent>
+            <SettingContent>
+              <SettingItem onClick={onFinish}>
+                <Tooltip placement="left" title={<span>发布问卷</span>} color="#01bd78">
+                <UpSquareFilled
+                  style={{ fontSize: '25px', color: '#01bd78'}}
+                />
+                </Tooltip>
+              </SettingItem>
+            </SettingContent>
+          {/* </Layout> */}
+        </Layout>
+      </ConfigProvider>
+    )
 }
 
-export default App
+const QuestionnaireContent = styled(Content)`
+  overflow: auto;
+  margin: 16px 0px 0px 16px;
+  background: white;
+  box-shadow: 0 3px 4px 0 grey;
+  height: 95vh;
+  min-width: 800px;
+  min-height: 600px;
+`
+const SettingContent = styled.div`
+  width: 40px;
+  height: 95vh;
+  margin: 16px 58px 0px 0px;
+`
+const SettingItem = styled.div`
+  width: 25px;
+  height: 25px;
+  margin: 7.5px;
+`
+
+const QuestionnaireTitle = styled.div`
+  width: 100%;
+  padding: 10px 0;
+  transition: all 0.3s ease-in-out;
+  &:hover {
+    background: #eee;
+  }
+`;
+
+const QuestionnaireDescription = styled.div`
+  width: 100%;
+  padding: 5px 0;
+  transition: all 0.3s ease-in-out;
+  &:hover {
+    background: #eee;
+  }
+`;
+
+const InputTitle = styled(Input)`
+  width: 700px;
+  height: 45px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  border-radius: 2px;
+`;
+
+const InputDescription = styled(TextArea)`
+  width: 900px;
+  font-size: 16px;
+  border-radius: 2px;
+`;
+
+const QuesitonnairePageText = styled.div`
+  font-size: 16px;
+  color: #999;
+  margin-top: 100px;
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+export default Questionnaire;
