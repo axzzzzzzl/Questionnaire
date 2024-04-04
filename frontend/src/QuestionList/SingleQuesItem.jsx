@@ -158,7 +158,7 @@ const SubjectRow = styled.div`
 const SubjectControlBar = styled.div`
   width: 50px;
   height: 100%;
-  background: #D3D3D3;
+  background: #eee;
   position: absolute;
   top: 0px;
   right: 0px;
@@ -167,6 +167,10 @@ const SubjectControlBar = styled.div`
   justify-content: space-around;
   align-items: center;
   z-index: 3;
+  transition: all 0.2s ease-in-out;
+  &: hover {  
+    background: #D3D3D3;
+    }
 `;
 
 const SubjectRowRequire = styled.span`

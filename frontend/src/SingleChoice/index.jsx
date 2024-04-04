@@ -7,6 +7,7 @@ import {
 } from "@ant-design/icons";
 import { Input, Checkbox, Button, Form, Divider, Modal, message } from "antd";
 import { useState } from "react";
+import BatchEditModal from "./BatchEditModal";
 
 export const SingleChoice = (props) => {
   const {
@@ -25,12 +26,14 @@ export const SingleChoice = (props) => {
   const [title, setTitle] = useState(currQues.title);
   const [remarks, setRemarks] = useState(currQues.remarks);
   const [option, setOption] = useState(
-    JSON.parse(JSON.stringify(currQues.option))
+    JSON.parse(JSON.stringify(currQues.option))//深拷贝(option无需深拷贝)
   );
   const [isNecessary, setIsNecessary] = useState(currQues.isNecessary);
   const [hasRemarks, setHasRemarks] = useState(
     currQues.remarks === null ? false : true
   );
+  const [open, setOpen] = useState(false);//批量编辑Modal显示
+  const [mutiOption, setMutiOption] = useState("");//批量编辑
 
   function generateKey() {
     return Number(Math.random().toString().slice(2, 7) + Date.now()).toString(36);
@@ -47,12 +50,14 @@ export const SingleChoice = (props) => {
     return setOption(newChoices);
   };
 
-  const onChange = (no, e) => {
-    const choice = option.find((item) => item.no === no);
-    choice["text"] = e.target.value;
-  };
-  const onBlur = () => {
-    setOption(option);
+  const handleChange = (no, e) => {
+    let newChoices = option.map((item) => {
+      if (item.no === no) {
+        return { ...item, text: e.target.value };
+      }
+      return item;
+    })
+    setOption(newChoices);
   };
 
   const onSubmit = () => {
@@ -80,7 +85,7 @@ export const SingleChoice = (props) => {
       setEditorStatus("NotEdit");
       setEditorType(null);
       setIsUpdate(false);
-      message.success("问卷修改成功")
+      message.success("问题修改成功")
     }
     else{
       questionList.push(questionItem);
@@ -99,6 +104,14 @@ export const SingleChoice = (props) => {
       setIsUpdate(false);
     }
   };
+
+  const handleClick = () => {
+    setOpen(true);
+    setMutiOption(option.map((item) => item.text).join("\n"));
+  }
+  const handleCancel = () => {
+    setOpen(false);
+  }
 
     return (
     <EditerInner>
@@ -120,7 +133,6 @@ export const SingleChoice = (props) => {
         <EditorRowContent>
           <EditorRowTitle>题目</EditorRowTitle>
             <EditorInput
-              defaultValue={title}
               value={title}
               onChange={(e) => {
                 setTitle(e.target.value);
@@ -146,49 +158,83 @@ export const SingleChoice = (props) => {
               >
                 备注
               </Checkbox>
-              {hasRemarks ? (
+              {hasRemarks && (
                 <EditorInput
-                  defaultValue={remarks}
+                  // defaultValue={remarks}
+                  value={remarks}
                   onChange={(e) => {
                     setRemarks(e.target.value);
                   }}
                 />
-                ) : (
-                  <></>
-              )}
+                )
+              }
             </EditorRowContent>
         </Form.Item>
-        {/* <ul> */}
-          {option.map((item, index) => (
-            <Form.Item name={["option", item.no, "text"]} index={index} key={item.no} style={{margin: "16px 0", height: "40px"}}>
-              <EditorRowContent>
-                <EditorRowTitle><UnorderedListOutlined style={{color: "#01bd78", fontSize: "20px"}}/></EditorRowTitle>
-                <EditorInput
-                  defaultValue={item.text}
-                  placeholder="选项"
-                  onChange={(e) => {
-                    onChange(item.no, e);
-                  }}
-                  onBlur={() => {
-                    onBlur();
-                  }}
-                />
-                <EditorRowTitle onClick={() => del(item.no)}><CloseOutlined style={{color: "#01bd78", fontSize: "20px"}}/></EditorRowTitle>
-              </EditorRowContent>
-              
-            </Form.Item>
-          ))}
-        {/* </ul> */}
-        <Form.Item>
+        {option.map((item, index) => (
+          <Form.Item 
+            // name={["option", item.no]} 
+            key={item.no} 
+            style={{margin: "16px 0", height: "40px"}}>
             <EditorRowContent>
-              <Button type="dashed" style={{margin: "0 40px", width: "100%"}} onClick={add}><PlusSquareOutlined style={{color: "#01bd78"}}/>新建选项</Button>
+              <EditorRowTitle>
+                <UnorderedListOutlined style={{color: "#01bd78", fontSize: "20px"}}/>
+              </EditorRowTitle>
+              <EditorInput
+                value={item.text}
+                placeholder="选项"
+                onChange={(e) => {
+                  handleChange(item.no, e);
+                }}
+              />
+              <EditorRowTitle 
+                onClick={() => del(item.no)}>
+                <CloseOutlined style={{color: "#01bd78", fontSize: "20px"}}/>
+              </EditorRowTitle>
+            </EditorRowContent>
+          </Form.Item>
+        ))}
+        <Form.Item style={{margin: 0, height: "40px"}}>
+            <EditorRowContent>
+              <Button 
+                type="dashed" 
+                style={{margin: "0 40px", width: "100%"}} 
+                onClick={add}
+              >
+              <PlusSquareOutlined 
+                style={{color: "#01bd78"}}
+              />
+              新建选项
+              </Button>
+            </EditorRowContent>
+        </Form.Item>
+        <Form.Item>
+            <EditorRowContent >
+              <a onClick={handleClick} style={{marginLeft: 40}}>批量编辑</a>
+              <BatchEditModal 
+                open={open} 
+                onCancel={handleCancel} 
+                setOption={setOption} 
+                mutiOption={mutiOption} 
+                setMutiOption={setMutiOption}/>
             </EditorRowContent>
         </Form.Item>
         <Divider />
         <Form.Item>
-          <div style={{display: "flex", justifyContent: "center", height: "40px", marginBottom: "16px"}}>
-              <Button htmlType="submit" type="primary" style={{marginRight: "10px", height: "40px", width: "10vw"}}>确定</Button>
-              <Button onClick={Cancel} style={{marginLeft: "10px", height: "40px", width: "10vw"}}>取消</Button>
+          <div 
+            style={{display: "flex", justifyContent: "center", height: "40px", marginBottom: "16px"}}>
+              <Button 
+                htmlType="submit" 
+                type="primary" 
+                style={{marginRight: "10px", height: "40px", width: "10vw", minWidth: "60px"}}
+              >
+                确定
+              </Button>
+              <Button 
+                onClick={Cancel} 
+                style={{marginLeft: "10px", height: "40px", width: "10vw", minWidth: "60px"}}
+              >
+                取消
+              </Button>
               {/* 防抖 */}
           </div>
         </Form.Item>

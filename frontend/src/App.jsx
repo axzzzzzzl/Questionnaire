@@ -96,10 +96,10 @@ const Questionnaire = () => {
               },
           }}
       >
-        <Layout style={{minHeight: '100vh', textAlign: "center", background: "#eee"}}>
+        <Layout style={{minHeight: '100vh', minWidth: '1100px', textAlign: "center", background: "#eee"}}>
           <Sider
             style={{
-              background: "#eee"
+              background: "#eee",
             }}
             width="232px"
           >
