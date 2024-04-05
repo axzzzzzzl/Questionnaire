@@ -1,4 +1,4 @@
-import { Radio, Space, Divider, Modal, message } from "antd";
+import { Radio, Space, Divider, Modal, Button, message, Popconfirm } from "antd";
 import styled from "@emotion/styled";
 import { useState, useEffect } from "react";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
@@ -17,39 +17,30 @@ export const SingleQuesItem = (props) => {
     setEditorType,
     // isUpdate,
     // setIsUpdate,
+    disabled,
+    SetDisabled,
   } = props;
   const [hovering, setHovering] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
 
   const ques_option = Object.values(questionItem.option);
 
-  function next_id() {
-    var current_id = 0;
-    return function () {
-      return ++current_id;
-    };
-  }
-
-  const option_id = next_id();
-
-  const deleteQues = () => {
-    Modal.confirm({
-      title: "确定删除这个问题吗",
-      content: "点击确定删除这个问题",
-      okText: "确定",
-      cancelText: "取消",
-      onOk() {
-        const newQuestionList = questionList.filter(
-          (ques) => ques !== questionItem
-        );
-        setQuestionList(newQuestionList);
-      },
-    });
-  };
   useEffect(() => {
     if(isEdit && editorStatus==="Edit"){
       message.error("仍有问题未编辑完成...")
       setIsEdit(false);
+    }
+  },[editorStatus, isEdit])
+
+  useEffect(() => {
+    if(editorStatus==="NotEdit" && isEdit){
+      SetDisabled(true)
+    }
+  },[editorStatus, isEdit])
+
+  useEffect(() => {
+    if(!isEdit||editorStatus==="Edit"){
+      SetDisabled(false)
     }
   },[editorStatus, isEdit])
 
@@ -96,17 +87,37 @@ export const SingleQuesItem = (props) => {
                       }}
                       style={{ fontSize: "20px", color: "#01bd78" }}
                     />
-                    <DeleteOutlined 
-                      onClick={deleteQues} 
+                    <Popconfirm
+                      title="您确定删除这个问题吗?"
+                      icon={
+                        <DeleteOutlined
+                          style={{
+                            color: '#01bd78',
+                          }}
+                        />
+                      }
+                      onConfirm={() => {
+                        const newQuestionList = questionList.filter(
+                          (ques) => ques !== questionItem
+                        );
+                        setQuestionList(newQuestionList);
+                        message.success('删除成功')
+                      }}
+                      onCancel={() => message.success('取消成功')}
+                      okText="确定"
+                      cancelText="取消"
+                    >
+                      <DeleteOutlined
                       style={{ fontSize: "20px", color: "#01bd78" }}
                       />
+                    </Popconfirm>
                 </SubjectControlBar>
               ) : (
                 <></>
               )}
-          
+          <div style={{width: "90%", margin: "0 auto"}}><Divider /></div>
         </QuestionnaireItem>
-        <div style={{width: "90%", margin: "0 auto"}}><Divider /></div>
+        
         
       </>
         ) : (

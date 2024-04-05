@@ -12,21 +12,13 @@ export const LeftSide = (props) => {
         setEditorStatus,
         editorType,
         setEditorType,
-        ques_no,
-        setQuesno,
     } = props;
 
     const handleSingleChoiceClick= () => {
         if (editorStatus === "NotEdit") {
             setEditorType("SingleChoice");
             setEditorStatus("Edit");
-            setQuesno(ques_no + 1);
         } else {
-            // Modal.info({
-            //   title: "提示",
-            //   content: "仍有问题未编辑完成...",
-            //   okText: "确定",
-            // });
             message.error("仍有问题未编辑完成...")
         }
     }
@@ -34,7 +26,6 @@ export const LeftSide = (props) => {
         if (editorStatus === "NotEdit") {
             setEditorType("MultipleChoice");
             setEditorStatus("Edit");
-            setQuesno(ques_no + 1);
         } else {
             message.error("仍有问题未编辑完成...")
           }
@@ -43,10 +34,8 @@ export const LeftSide = (props) => {
         if (editorStatus === "NotEdit") {
             setEditorType("SingleLineText");
             setEditorStatus("Edit");
-            setQuesno(ques_no + 1);
         } else {
             message.error("仍有问题未编辑完成...")
-            setEditorStatus("NotEdit");
         }
     }
     const items = [

@@ -1,4 +1,14 @@
 import { SingleQuesItem } from "./SingleQuesItem.jsx";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { useState } from "react";
+
+const reorder = (list, startIndex, endIndex) => {
+    const result = Array.from(list);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
+  
+    return result;
+};
 
 export const QuestionList = (props) => {
     const {
@@ -10,31 +20,59 @@ export const QuestionList = (props) => {
         setEditorType,
     } = props;
 
-    var initialId = 0;
+    const [disabled, SetDisabled] = useState(false);
 
-    function generateId() {
-        return ++initialId;
+    function onDragEnd(result) {
+        if (!result.destination) {
+          return;
+        }
+        if (result.destination.index === result.source.index) {
+          return;
+        }
+        let newQuestionList = reorder(
+          questionList,
+          result.source.index,
+          result.destination.index
+        );
+        setQuestionList(newQuestionList);
+    
     }
-
-    function generateKey() {
-        return Number(Math.random().toString().slice(2, 7) + Date.now()).toString(36);
-    }
-
     return(
-        <div>
-            {questionList.map((questionItem, index) => (
-            <SingleQuesItem
-                key={questionItem.no}
-                ques_id={generateId()}
-                questionItem={questionItem}
-                questionList={questionList}
-                setQuestionList={setQuestionList}
-                editorStatus={editorStatus}
-                setEditorStatus={setEditorStatus}
-                editorType={editorType}
-                setEditorType={setEditorType}
-            />
-            ))}
-        </div>
+        <DragDropContext onDragEnd={onDragEnd}>
+            <Droppable droppableId="options">
+                {provided => (
+                <div ref={provided.innerRef} {...provided.droppableProps}>
+                    {questionList.map((questionItem, index) => {
+                        return(
+                        <Draggable draggableId={questionItem.no} key={questionItem.no} index={index} isDragDisabled={disabled}>
+                        {provided => (
+                            <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                            >
+                                <SingleQuesItem
+                                  ques_id={index+1}
+                                  questionItem={questionItem}
+                                  questionList={questionList}
+                                  setQuestionList={setQuestionList}
+                                  editorStatus={editorStatus}
+                                  setEditorStatus={setEditorStatus}
+                                  editorType={editorType}
+                                  setEditorType={setEditorType}
+
+                                  disabled={disabled}
+                                  SetDisabled={SetDisabled}
+                                />
+                            </div>
+                        )}
+                        </Draggable>
+                        )
+                    })}
+                    {provided.placeholder}
+                </div>
+                )}
+            </Droppable>
+        </DragDropContext>
     )
 }

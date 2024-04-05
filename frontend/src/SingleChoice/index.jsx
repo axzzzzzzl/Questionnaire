@@ -6,8 +6,17 @@ import {
   UnorderedListOutlined,
 } from "@ant-design/icons";
 import { Input, Checkbox, Button, Form, Divider, Modal, message } from "antd";
-import { useState } from "react";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import React, { useState } from "react";
 import BatchEditModal from "./BatchEditModal";
+
+const reorder = (list, startIndex, endIndex) => {
+  const result = Array.from(list);
+  const [removed] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
+
+  return result;
+};
 
 export const SingleChoice = (props) => {
   const {
@@ -35,6 +44,21 @@ export const SingleChoice = (props) => {
   const [open, setOpen] = useState(false);//批量编辑Modal显示
   const [mutiOption, setMutiOption] = useState("");//批量编辑
 
+  function onDragEnd(result) {
+    if (!result.destination) {
+      return;
+    }
+    if (result.destination.index === result.source.index) {
+      return;
+    }
+    let newOptions = reorder(
+      option,
+      result.source.index,
+      result.destination.index
+    );
+    setOption(newOptions);
+  }
+
   function generateKey() {
     return Number(Math.random().toString().slice(2, 7) + Date.now()).toString(36);
   }
@@ -46,6 +70,11 @@ export const SingleChoice = (props) => {
   };
   const del = (deleteId) => {
     let newChoices = option.filter((item) => item.no !== deleteId);
+    form.setFieldsValue({ option: newChoices });
+    return setOption(newChoices);
+  };
+  const addOther = () => {
+    let newChoices = [...option, { no: generateKey(), text: "其他" }];
     form.setFieldsValue({ option: newChoices });
     return setOption(newChoices);
   };
@@ -140,7 +169,7 @@ export const SingleChoice = (props) => {
             />
         </EditorRowContent>
         </Form.Item>
-        <Form.Item name="remarks" style={{margin: "16px 0", height: "40px"}}>
+        <Form.Item name="remarks" style={{margin: "16px 0 8px 0", height: "40px"}}>
             <EditorRowContent>
               <Checkbox 
                 style={{marginLeft: "40px"}}
@@ -170,30 +199,47 @@ export const SingleChoice = (props) => {
               }
             </EditorRowContent>
         </Form.Item>
-        {option.map((item, index) => (
-          <Form.Item 
-            // name={["option", item.no]} 
-            key={item.no} 
-            style={{margin: "16px 0", height: "40px"}}>
-            <EditorRowContent>
-              <EditorRowTitle>
-                <UnorderedListOutlined style={{color: "#01bd78", fontSize: "20px"}}/>
-              </EditorRowTitle>
-              <EditorInput
-                value={item.text}
-                placeholder="选项"
-                onChange={(e) => {
-                  handleChange(item.no, e);
-                }}
-              />
-              <EditorRowTitle 
-                onClick={() => del(item.no)}>
-                <CloseOutlined style={{color: "#01bd78", fontSize: "20px"}}/>
-              </EditorRowTitle>
-            </EditorRowContent>
-          </Form.Item>
-        ))}
-        <Form.Item style={{margin: 0, height: "40px"}}>
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Droppable droppableId="options">
+            {provided => (
+              <div ref={provided.innerRef} {...provided.droppableProps}>
+                {
+                  option.map((item, index) => {
+                    return(
+                      <Draggable draggableId={item.no} key={item.no} index={index}>
+                      {provided => (
+                        <EditorRowContentDND
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                        >
+                          <EditorRowTitle>
+                            <UnorderedListOutlined style={{color: "#01bd78", fontSize: "20px"}}/>
+                          </EditorRowTitle>
+                          <EditorInput
+                            value={item.text}
+                            placeholder="选项"
+                            onChange={(e) => {
+                              handleChange(item.no, e);
+                            }}
+                          />
+                          <EditorRowTitle 
+                            onClick={() => del(item.no)}>
+                            <CloseOutlined style={{color: "#01bd78", fontSize: "20px"}}/>
+                          </EditorRowTitle>
+                        </EditorRowContentDND>
+                        // </Form.Item>
+                      )}
+                    </Draggable>
+                    )
+                  })
+                }
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
+        <Form.Item style={{margin: "8px 0", height: "40px"}}>
             <EditorRowContent>
               <Button 
                 type="dashed" 
@@ -207,9 +253,10 @@ export const SingleChoice = (props) => {
               </Button>
             </EditorRowContent>
         </Form.Item>
-        <Form.Item>
-            <EditorRowContent >
-              <a onClick={handleClick} style={{marginLeft: 40}}>批量编辑</a>
+        <Form.Item style={{margin: 0, height: "40px"}}>
+            <EditorRowContent>
+              <a onClick={handleClick} style={{marginLeft: 40, color: "#01bd78"}}>批量编辑</a>
+              <a onClick={addOther} style={{marginLeft: 20, color: "#01bd78"}}>“其他”选项</a>
               <BatchEditModal 
                 open={open} 
                 onCancel={handleCancel} 
@@ -263,8 +310,17 @@ const EditorRowContent = styled.div`
   display: flex;
   flex: 1;
   height: 40px;
-  // background: skyblue;
   align-items: center;
+  // background: skyblue;
+`;
+
+const EditorRowContentDND = styled.div`
+  display: flex;
+  flex: 1;
+  height: 56px;
+  align-items: center;
+  padding: 8px 0;
+  // background: red;
 `;
 
 const EditorRowTitle = styled.div`

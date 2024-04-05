@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Layout, Input, Modal, Divider, ConfigProvider, Tooltip } from "antd";
+import { Layout, Input, Modal, Divider, ConfigProvider, Tooltip, message } from "antd";
 import { UpSquareFilled, EditFilled } from "@ant-design/icons";
 import styled from "@emotion/styled";
 import './App.css';
 import { LeftSide } from "./LeftSide";
 import { QuestionList } from "./QuestionList";
 import { SingleChoice } from "./SingleChoice";
+import zhCN from 'antd/locale/zh_CN';
+import 'dayjs/locale/zh-cn';
+import SubmitModal from "./SingleChoice/SubmitModal";
 // import { useNavigate } from "react-router-dom";
 // import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-// export const DivRefContext = createContext();
 
 const { Header, Content, Footer, Sider } = Layout;
 const { TextArea } = Input;
@@ -16,15 +18,14 @@ const { TextArea } = Input;
 const Questionnaire = () => {
     const [editorStatus, setEditorStatus] = useState("NotEdit");//是否在编辑
     const [editorType, setEditorType] = useState(null);//编辑题目的类型
-    const [ques_no, setQuesno] = useState(0);//
 
     const [questionnaireTitle, setquestionnaireTitle] = useState("");
     const [description, setDescription] = useState("");
     const [questionList, setQuestionList] = useState([]);
-    // var id = 1;
-    // const [hovering, setHovering] = useState(false);
+    const [questionnaire, setQuestionnaire] = useState("");
 
     const listRef = useRef(null);
+    const [open, setOpen] = useState(false);
 
     useEffect(() => {
       if(editorType === "SingleChoice"){
@@ -32,11 +33,6 @@ const Questionnaire = () => {
         current.scrollTop = current.scrollHeight;
       }
     },[editorType])
-
-
-    // const generateId = () => {
-    //     return ++id;
-    // }
 
     function generateKey() {
         return Number(Math.random().toString().slice(3, 8) + Date.now()).toString(36);
@@ -49,8 +45,8 @@ const Questionnaire = () => {
         remarks: null,
         isNecessary: false,
         option: [
-          { no: 1, text: "" },
-          { no: 2, text: "" },
+          { no: generateKey(), text: "" },
+          { no: generateKey(), text: "" },
         ],
     };
     const currMultipleChoiceQues = {
@@ -72,19 +68,24 @@ const Questionnaire = () => {
         remarks: null,
     };
 
+
+    const handleCancel = () => {
+        setOpen(false);
+    }
     const onFinish = () => {
-        const questionnaire = {
+        if(questionnaireTitle === ""){
+          message.error("请输入问卷标题");
+          return;
+        }
+        const newQuestionnaire = {
             title: questionnaireTitle,
             description: description,
             id: generateKey(),
             questions: questionList,
         };
-        // Modal.info({
-        //     title: "Questionnaire:   ",
-        //     content: JSON.stringify(questionnaire),
-        //     okText: "确定",
-        //   });
-        alert("Questionnaire:   " + JSON.stringify(questionnaire, null, 2))
+        setQuestionnaire(newQuestionnaire);
+        setOpen(true);
+        // alert("Questionnaire:   " + JSON.stringify(questionnaire, null, 2))
     };
 
     return (
@@ -95,6 +96,7 @@ const Questionnaire = () => {
               borderRadius: 2,
               },
           }}
+          locale={zhCN}
       >
         <Layout style={{minHeight: '100vh', minWidth: '1100px', textAlign: "center", background: "#eee"}}>
           <Sider
@@ -108,8 +110,6 @@ const Questionnaire = () => {
               setEditorStatus={setEditorStatus}
               editorType={editorType}
               setEditorType={setEditorType}
-              ques_no={ques_no}
-              setQuesno={setQuesno}
             />
           </Sider>
           {/* <Layout style={{ minHeight: '100vh', background: "#eee" }}> */}
@@ -191,7 +191,6 @@ const Questionnaire = () => {
                     }
                     {editorType === "MultipleChoice" && <p>多选题</p>}
                     {editorType === "SingleLineText" && <p>文本题</p>}
-                    {/* {editorType === null && <p>null</p>} */}
                 </div>
               
             </QuestionnaireContent>
@@ -203,6 +202,7 @@ const Questionnaire = () => {
                 />
                 </Tooltip>
               </SettingItem>
+              <SubmitModal open={open} onCancel={handleCancel} questionnaire={questionnaire}/>
             </SettingContent>
           {/* </Layout> */}
         </Layout>
