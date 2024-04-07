@@ -6,7 +6,7 @@ import {
 } from "@ant-design/icons";
 import { Tabs, message } from "antd";
 
-export const LeftSide = (props) => {
+export const EditorLeft = (props) => {
     const {
         editorStatus,
         setEditorStatus,
@@ -79,7 +79,7 @@ const Left = styled.div`
 const Btn = styled.div`
     height: 40px;
     margin: 8px 16px;
-    border: 1px solid #01bd78;
+    border: 1.5px solid #01bd78;
     border-radius: 2px;
     color: #01bd78;
     font-size: 15px;

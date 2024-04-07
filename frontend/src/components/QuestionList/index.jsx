@@ -1,4 +1,5 @@
 import { SingleQuesItem } from "./SingleQuesItem.jsx";
+import { MultipleQuesItem } from "./MultipleQuesItem.jsx";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { useState } from "react";
 
@@ -51,6 +52,7 @@ export const QuestionList = (props) => {
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
                             >
+                                {questionItem.type === 0 && 
                                 <SingleQuesItem
                                   ques_id={index+1}
                                   questionItem={questionItem}
@@ -64,6 +66,22 @@ export const QuestionList = (props) => {
                                   disabled={disabled}
                                   SetDisabled={SetDisabled}
                                 />
+                                }
+                                {questionItem.type === 1 && 
+                                <MultipleQuesItem
+                                  ques_id={index+1}
+                                  questionItem={questionItem}
+                                  questionList={questionList}
+                                  setQuestionList={setQuestionList}
+                                  editorStatus={editorStatus}
+                                  setEditorStatus={setEditorStatus}
+                                  editorType={editorType}
+                                  setEditorType={setEditorType}
+
+                                  disabled={disabled}
+                                  SetDisabled={SetDisabled}
+                                />
+                                }
                             </div>
                         )}
                         </Draggable>

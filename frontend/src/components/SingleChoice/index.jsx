@@ -8,7 +8,7 @@ import {
 import { Input, Checkbox, Button, Form, Divider, Modal, message } from "antd";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import React, { useState } from "react";
-import BatchEditModal from "./BatchEditModal";
+import BatchEditModal from "../BatchEditModal";
 
 const reorder = (list, startIndex, endIndex) => {
   const result = Array.from(list);
@@ -26,20 +26,20 @@ export const SingleChoice = (props) => {
     setEditorStatus,
     editorType,
     setEditorType,
-    currQues,
+    currSingleChoiceQues,
     isUpdate,
     setIsUpdate
   } = props;
 
   const [form] = Form.useForm();
-  const [title, setTitle] = useState(currQues.title);
-  const [remarks, setRemarks] = useState(currQues.remarks);
+  const [title, setTitle] = useState(currSingleChoiceQues.title);
+  const [remarks, setRemarks] = useState(currSingleChoiceQues.remarks);
   const [option, setOption] = useState(
-    JSON.parse(JSON.stringify(currQues.option))//深拷贝(option无需深拷贝)
+    JSON.parse(JSON.stringify(currSingleChoiceQues.option))//深拷贝(option无需深拷贝)
   );
-  const [isNecessary, setIsNecessary] = useState(currQues.isNecessary);
+  const [isNecessary, setIsNecessary] = useState(currSingleChoiceQues.isNecessary);
   const [hasRemarks, setHasRemarks] = useState(
-    currQues.remarks === null ? false : true
+    currSingleChoiceQues.remarks === null ? false : true
   );
   const [open, setOpen] = useState(false);//批量编辑Modal显示
   const [mutiOption, setMutiOption] = useState("");//批量编辑
@@ -91,26 +91,27 @@ export const SingleChoice = (props) => {
 
   const onSubmit = () => {
     const questionItem = {
-      no: currQues.no,
-      type: 0,
+      no: currSingleChoiceQues.no,
+      type: currSingleChoiceQues.type,
       title: title,
       remarks: hasRemarks ? remarks : null,
       isNecessary: isNecessary,
       option: option,
     };
-    if (isUpdate && questionItem === currQues){
+    if (isUpdate && questionItem === currSingleChoiceQues){
       setEditorStatus("NotEdit");
       setEditorType(null);
       setIsUpdate(false);
       message.success("问卷并未修改")
     }
-    else if(isUpdate && questionItem !== currQues){
-      var editQues = questionList.find((ques) => ques.no === questionItem.no);
-      editQues.title = questionItem.title;
-      editQues.isNecessary = questionItem.isNecessary;
-      editQues.remarks = questionItem.remarks;
-      editQues.option = questionItem.option;
-      setQuestionList(questionList);
+    else if(isUpdate && questionItem !== currSingleChoiceQues){
+      let newQuestionList = questionList.map((item) => {
+        if (item.no === questionItem.no) {
+          return questionItem;
+        }
+        return item;
+      })
+      setQuestionList(newQuestionList);
       setEditorStatus("NotEdit");
       setEditorType(null);
       setIsUpdate(false);

@@ -1,11 +1,11 @@
-import { Radio, Space, Divider, Modal, Button, message, Popconfirm } from "antd";
+import { Checkbox, Space, Divider, message, Popconfirm } from "antd";
 import styled from "@emotion/styled";
 import { useState, useEffect } from "react";
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import { DeleteOutlined, HighlightOutlined, CopyOutlined } from "@ant-design/icons";
 
-import { SingleChoice } from "../SingleChoice/index";
+import { MultipleChoice } from "../MultipleChoice";
 
-export const SingleQuesItem = (props) => {
+export const MultipleQuesItem = (props) => {
   const {
     ques_id,
     questionItem,
@@ -44,7 +44,26 @@ export const SingleQuesItem = (props) => {
     }
   },[editorStatus, isEdit])
 
-  
+  function generateKey() {
+    return Number(Math.random().toString().slice(2, 7) + Date.now()).toString(36);
+  }
+  const handleCopy = () => {
+    const newOptions = questionItem.option.map((item) => {
+      return { ...item, no: generateKey() };
+    })
+    const newQuestionItem = {
+      no: generateKey(),
+      type: questionItem.type,
+      title: questionItem.title,
+      remarks: questionItem.remarks,
+      isNecessary: questionItem.isNecessary,
+      option: newOptions
+    }
+    const newQuestionList = [...questionList, newQuestionItem];
+    setQuestionList(newQuestionList);
+    message.success('复制成功')
+  }
+
   return(
       !isEdit||editorStatus==="Edit" ? (
         <>
@@ -67,54 +86,50 @@ export const SingleQuesItem = (props) => {
             {questionItem.remarks && (
                 <SubjectRemarks>{questionItem.remarks}</SubjectRemarks>
             )}
-              <Radio.Group defaultValue={null}>
+              <Checkbox.Group >
                 <Space direction="vertical">
                   {ques_option.map((choice, index) => {
                     return (
-                      <Radio key={index} value={choice}>
+                      <Checkbox key={index} value={choice} >
                         {choice.text}
-                      </Radio>
+                      </Checkbox>
                     );
                   })}
                 </Space>
-              </Radio.Group>
+              </Checkbox.Group>
             </QuestionnaireSubjectInner>
-              {hovering ? (
-                <SubjectControlBar>
-                    <EditOutlined
-                      onClick={() => {
-                        setIsEdit(true);
-                      }}
-                      style={{ fontSize: "20px", color: "#01bd78" }}
-                    />
-                    <Popconfirm
-                      title="您确定删除这个问题吗?"
-                      icon={
-                        <DeleteOutlined
-                          style={{
-                            color: '#01bd78',
-                          }}
-                        />
-                      }
-                      onConfirm={() => {
-                        const newQuestionList = questionList.filter(
-                          (ques) => ques !== questionItem
-                        );
-                        setQuestionList(newQuestionList);
-                        message.success('删除成功')
-                      }}
-                      onCancel={() => message.success('取消成功')}
-                      okText="确定"
-                      cancelText="取消"
-                    >
-                      <DeleteOutlined
-                      style={{ fontSize: "20px", color: "#01bd78" }}
-                      />
-                    </Popconfirm>
-                </SubjectControlBar>
-              ) : (
-                <></>
-              )}
+            <SubjectControlBar style={{transform: hovering ? "translateX(0)" : ""}}>
+              <HighlightOutlinedIcon
+                onClick={() => {
+                  setIsEdit(true);
+                }}
+              />
+              <CopyOutlinedIcon 
+                onClick={handleCopy}
+              />
+              <Popconfirm
+                title="您确定删除这个问题吗?"
+                icon={
+                  <DeleteOutlined style={{
+                    color: '#01bd78',
+                    fontSize: "15px"
+                  }}
+                />
+                }
+                onConfirm={() => {
+                  const newQuestionList = questionList.filter(
+                    (ques) => ques !== questionItem
+                  );
+                  setQuestionList(newQuestionList);
+                  message.success('删除成功')
+                }}
+                onCancel={() => message.success('取消成功')}
+                okText="确定"
+                cancelText="取消"
+              >
+                <DeleteOutlinedIcon />
+              </Popconfirm>
+            </SubjectControlBar>
           <div style={{width: "90%", margin: "0 auto"}}><Divider /></div>
         </QuestionnaireItem>
         
@@ -123,14 +138,14 @@ export const SingleQuesItem = (props) => {
         ) : (
           <>
           <div style={{background: '#eee'}}>
-          <SingleChoice
+          <MultipleChoice
             questionList={questionList}
             setQuestionList={setQuestionList}
             editorStatus={editorStatus}
             setEditorStatus={setEditorStatus}
             editorType={editorType}
             setEditorType={setEditorType}
-            currQues={questionItem}
+            currMultipleChoiceQues={questionItem}
             
             isUpdate={isEdit}
             setIsUpdate={setIsEdit}
@@ -150,7 +165,7 @@ const QuestionnaireItem = styled.div`
   text-align: left;
   z-index: 1;
   &: hover {  
-  background: #eee;
+  background: rgb(245, 245, 245);
   }
 `;
 
@@ -177,11 +192,8 @@ const SubjectControlBar = styled.div`
   flex-direction: column;
   justify-content: space-around;
   align-items: center;
-  z-index: 3;
-  transition: all 0.2s ease-in-out;
-  &: hover {  
-    background: #D3D3D3;
-    }
+  transform: translateX(100%);
+  transition: transform .2s;
 `;
 
 const SubjectRowRequire = styled.span`
@@ -194,4 +206,23 @@ const SubjectRemarks = styled.div`
   font-size: 12px;
   color: #999;
   margin-bottom: 6px;
+`;
+
+const HighlightOutlinedIcon = styled(HighlightOutlined)`
+  font-size: 17px;
+  &:hover{
+    color: #01bd78;
+  }
+`;
+const DeleteOutlinedIcon = styled(DeleteOutlined)`
+  font-size: 17px;
+  &:hover{
+    color: #01bd78;
+  }
+`;
+const CopyOutlinedIcon = styled(CopyOutlined)`
+  font-size: 17px;
+  &:hover{
+    color: #01bd78;
+  }
 `;
