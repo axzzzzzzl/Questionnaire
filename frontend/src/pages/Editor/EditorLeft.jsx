@@ -32,7 +32,7 @@ export const EditorLeft = (props) => {
     }
     const handleSingleLineTextClick= () => {
         if (editorStatus === "NotEdit") {
-            setEditorType("SingleLineText");
+            setEditorType("Text");
             setEditorStatus("Edit");
         } else {
             message.error("仍有问题未编辑完成...")
@@ -89,7 +89,7 @@ const Btn = styled.div`
     justify-content: center;
     user-select: none;
     cursor: pointer;
-    transition: all 0.5s ease-in-out, border-width 0.4s;
+    transition: all 0.2s ease-in-out, border-width 0.1s;
     &:hover {
         border-width: 3px;
         background: #34ca93;

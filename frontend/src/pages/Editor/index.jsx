@@ -31,6 +31,10 @@ export const Editor = () => {
         const current = listRef.current;
         current.scrollTop = current.scrollHeight;
       }
+      else if(editorType === "Text"){
+        const current = listRef.current;
+        current.scrollTop = current.scrollHeight;
+      }
     },[editorType])
 
     function generateKey() {
@@ -61,12 +65,13 @@ export const Editor = () => {
         ],
     };
     //默认文本题
-    const currLineTextQues = {
+    const currTextQues = {
         no: generateKey(),
         type: 2,
         title: null,
         isNecessary: false,
         remarks: null,
+        lineHeight: 1,
     };
 
 
@@ -121,7 +126,7 @@ export const Editor = () => {
                 setQuestionList={setQuestionList}
                 currSingleChoiceQues={currSingleChoiceQues}
                 currMultipleChoiceQues={currMultipleChoiceQues}
-                currLineTextQues={currLineTextQues}
+                currTextQues={currTextQues}
               />
             </MiddleContent>
             <SettingContent>

@@ -5,6 +5,7 @@ import styled from "@emotion/styled";
 import { QuestionList } from "../../components/QuestionList";
 import { SingleChoice } from "../../components/SingleChoice";
 import { MultipleChoice } from "../../components/MultipleChoice";
+import { Text } from "../../components/Text";
 const { TextArea } = Input;
 
 export const EditorMain = (props) => {
@@ -20,7 +21,8 @@ export const EditorMain = (props) => {
       questionList,
       setQuestionList,
       currSingleChoiceQues,
-      currMultipleChoiceQues
+      currMultipleChoiceQues,
+      currTextQues,
     } = props;
     return (
       <>
@@ -92,7 +94,17 @@ export const EditorMain = (props) => {
               currMultipleChoiceQues={currMultipleChoiceQues}
             />
             }
-            {editorType === "SingleLineText" && <p>文本题</p>}
+            {editorType === "Text" && 
+            <Text
+              questionList={questionList}
+              setQuestionList={setQuestionList}
+              editorStatus={editorStatus}
+              setEditorStatus={setEditorStatus}
+              editorType={editorType}
+              setEditorType={setEditorType}
+              currTextQues={currTextQues}
+            />
+            }
         </QuestionEditor>
       </>
     )
@@ -120,9 +132,10 @@ const InputTitle = styled(Input)`
   width: 700px;
   height: 45px;
   text-align: center;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: bold;
   border-radius: 2px;
+  color: #01bd78;
 `;
 const InputDescription = styled(TextArea)`
   width: 900px;
