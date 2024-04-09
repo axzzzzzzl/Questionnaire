@@ -1,12 +1,13 @@
 import styled from "@emotion/styled";
 import zhCN from 'antd/locale/zh_CN';
 import React, { useState, useEffect, useRef } from "react";
-import { Layout, ConfigProvider, Tooltip, message } from "antd";
+import { Layout, ConfigProvider, Tooltip, message, Modal } from "antd";
 import { UpSquareFilled } from "@ant-design/icons";
 
 import { EditorLeft } from "./EditorLeft";
 import { EditorMain } from "./EditorMain";
 import SubmitModal from "../../components/SubmitModal";
+import ErrorModal from "../../components/ErrorModal";
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -21,6 +22,9 @@ export const Editor = () => {
 
     const listRef = useRef(null);
     const [open, setOpen] = useState(false);
+    const [openError, setOpenError] = useState(false);
+    const [errorInfo, setErrorInfo] = useState("");
+    const [errorTitle, setErrorTitle] = useState("");
 
     useEffect(() => {
       if(editorType === "SingleChoice"){
@@ -78,9 +82,20 @@ export const Editor = () => {
     const handleCancel = () => {
         setOpen(false);
     }
+    const handleCancelError = () => {
+      setOpenError(false);
+    }
     const onFinish = () => {
-        if(questionnaireTitle === ""){
-          message.error("请输入问卷标题");
+        if(questionnaireTitle === ""){  
+          setErrorTitle("问卷尚未完成编辑");
+          setErrorInfo("当前问卷还没有标题...");
+          setOpenError(true);
+          return;
+        }
+        else if(questionList.length === 0){  
+          setErrorTitle("问卷尚未完成编辑");
+          setErrorInfo("当前问卷还没有问题...");
+          setOpenError(true);
           return;
         }
         const newQuestionnaire = {
@@ -138,6 +153,7 @@ export const Editor = () => {
                 </Tooltip>
               </SettingItem>
               <SubmitModal open={open} onCancel={handleCancel} questionnaire={questionnaire}/>
+              <ErrorModal open={openError} onCancel={handleCancelError} errorInfo={errorInfo} errorTitle={errorTitle}/>
             </SettingContent>
         </Layout>
       </ConfigProvider>

@@ -2,6 +2,7 @@ import { Radio, Space, Divider, Modal, Button, message, Popconfirm } from "antd"
 import styled from "@emotion/styled";
 import { useState, useEffect } from "react";
 import { DeleteOutlined, HighlightOutlined, CopyOutlined } from "@ant-design/icons";
+import DeleteModal from "../DeleteModal";
 
 import { SingleChoice } from "../SingleChoice/index";
 
@@ -22,6 +23,7 @@ export const SingleQuesItem = (props) => {
   } = props;
   const [hovering, setHovering] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
 
   const ques_option = Object.values(questionItem.option);
 
@@ -67,6 +69,18 @@ export const SingleQuesItem = (props) => {
     message.success('复制成功')
   }
 
+  const handleDeleteOk = () => {
+    setOpenDelete(true)
+  }
+  const handleCancel = () => {
+    setOpenDelete(false)
+  }
+  const handleDelete = () => {
+    const newQuestionList = questionList.filter(
+      (ques) => ques !== questionItem
+    );
+    setQuestionList(newQuestionList);
+  }
   return(
       !isEdit||editorStatus==="Edit" ? (
         <>
@@ -110,29 +124,14 @@ export const SingleQuesItem = (props) => {
                 <CopyOutlinedIcon 
                   onClick={handleCopy}
                 />
-                <Popconfirm
-                  title="您确定删除这个问题吗?"
-                  icon={
-                    <DeleteOutlined
-                      style={{
-                        color: '#01bd78',
-                        fontSize: "15px"
-                      }}
-                    />
-                  }
-                  onConfirm={() => {
-                    const newQuestionList = questionList.filter(
-                      (ques) => ques !== questionItem
-                    );
-                    setQuestionList(newQuestionList);
-                    message.success('删除成功')
-                  }}
-                  onCancel={() => message.success('取消成功')}
-                  okText="确定"
-                  cancelText="取消"
-                >
-                  <DeleteOutlinedIcon />
-                </Popconfirm>
+                <DeleteOutlinedIcon
+                  onClick={handleDeleteOk}
+                />
+                <DeleteModal 
+                  open={openDelete} 
+                  onCancel={handleCancel}
+                  handleDelete={handleDelete}
+                />
               </SubjectControlBar>
           <div style={{width: "90%", margin: "0 auto"}}><Divider /></div>
         </QuestionnaireItem>

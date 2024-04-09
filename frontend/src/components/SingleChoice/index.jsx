@@ -229,7 +229,6 @@ export const SingleChoice = (props) => {
                             <CloseOutlined style={{color: "#01bd78", fontSize: "20px"}}/>
                           </EditorRowTitle>
                         </EditorRowContentDND>
-                        // </Form.Item>
                       )}
                     </Draggable>
                     )
