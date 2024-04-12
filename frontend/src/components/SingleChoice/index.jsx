@@ -10,6 +10,8 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import React, { useState } from "react";
 import BatchEditModal from "../BatchEditModal";
 
+let nextId = 3;
+
 const reorder = (list, startIndex, endIndex) => {
   const result = Array.from(list);
   const [removed] = result.splice(startIndex, 1);
@@ -63,25 +65,25 @@ export const SingleChoice = (props) => {
     return Number(Math.random().toString().slice(2, 7) + Date.now()).toString(36);
   }
 
+  function generateId() {
+    return (nextId++).toString();
+  }
   const add = () => {
-    let newChoices = [...option, { no: generateKey(), text: "" }];
-    form.setFieldsValue({ option: newChoices });
+    let newChoices = [...option, { id: generateId(), text: "" }];
     return setOption(newChoices);
   };
   const del = (deleteId) => {
-    let newChoices = option.filter((item) => item.no !== deleteId);
-    form.setFieldsValue({ option: newChoices });
+    let newChoices = option.filter((item) => item.id !== deleteId);
     return setOption(newChoices);
   };
   const addOther = () => {
-    let newChoices = [...option, { no: generateKey(), text: "其他" }];
-    form.setFieldsValue({ option: newChoices });
+    let newChoices = [...option, { id: generateId(), text: "其他" }];
     return setOption(newChoices);
   };
 
-  const handleChange = (no, e) => {
+  const handleChange = (id, e) => {
     let newChoices = option.map((item) => {
-      if (item.no === no) {
+      if (item.id === id) {
         return { ...item, text: e.target.value };
       }
       return item;
@@ -91,7 +93,7 @@ export const SingleChoice = (props) => {
 
   const onSubmit = () => {
     const questionItem = {
-      no: currSingleChoiceQues.no,
+      id: currSingleChoiceQues.id,
       type: currSingleChoiceQues.type,
       title: title,
       remarks: hasRemarks ? remarks : null,
@@ -106,7 +108,7 @@ export const SingleChoice = (props) => {
     }
     else if(isUpdate && questionItem !== currSingleChoiceQues){
       let newQuestionList = questionList.map((item) => {
-        if (item.no === questionItem.no) {
+        if (item.id === questionItem.id) {
           return questionItem;
         }
         return item;
@@ -207,7 +209,7 @@ export const SingleChoice = (props) => {
                 {
                   option.map((item, index) => {
                     return(
-                      <Draggable draggableId={item.no} key={item.no} index={index}>
+                      <Draggable draggableId={item.id} key={item.id} index={index}>
                       {provided => (
                         <EditorRowContentDND
                           ref={provided.innerRef}
@@ -221,11 +223,11 @@ export const SingleChoice = (props) => {
                             value={item.text}
                             placeholder="选项"
                             onChange={(e) => {
-                              handleChange(item.no, e);
+                              handleChange(item.id, e);
                             }}
                           />
                           <EditorRowTitle 
-                            onClick={() => del(item.no)}>
+                            onClick={() => del(item.id)}>
                             <CloseOutlined style={{color: "#01bd78", fontSize: "20px"}}/>
                           </EditorRowTitle>
                         </EditorRowContentDND>

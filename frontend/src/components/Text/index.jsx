@@ -27,13 +27,9 @@ export const Text = (props) => {
   );
   const [lineHeight, setLineHeight] = useState(currTextQues.lineHeight);
 
-  function generateKey() {
-    return Number(Math.random().toString().slice(2, 7) + Date.now()).toString(36);
-  }
-
   const onSubmit = () => {
     const questionItem = {
-      no: currTextQues.no,
+      id: currTextQues.id,
       type: currTextQues.type,
       title: title,
       remarks: hasRemarks ? remarks : null,

@@ -72,16 +72,16 @@ export const EditorMain = (props) => {
             setEditorType={setEditorType}
         />
         <QuestionEditor>
-            {editorType === "SingleChoice"   && 
-            <SingleChoice
-              questionList={questionList}
-              setQuestionList={setQuestionList}
-              editorStatus={editorStatus}
-              setEditorStatus={setEditorStatus}
-              editorType={editorType}
-              setEditorType={setEditorType}
-              currSingleChoiceQues={currSingleChoiceQues}
-            />
+            {editorType === "SingleChoice"   &&
+              <SingleChoice
+                questionList={questionList}
+                setQuestionList={setQuestionList}
+                editorStatus={editorStatus}
+                setEditorStatus={setEditorStatus}
+                editorType={editorType}
+                setEditorType={setEditorType}
+                currSingleChoiceQues={currSingleChoiceQues}
+              />
             }
             {editorType === "MultipleChoice" && 
             <MultipleChoice

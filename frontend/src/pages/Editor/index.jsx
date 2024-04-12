@@ -46,31 +46,31 @@ export const Editor = () => {
     }
     //默认单选题
     const currSingleChoiceQues = {
-        no: generateKey(),
+        id: generateKey(),
         title: "",
         type: 0,
         remarks: null,
         isNecessary: false,
         option: [
-          { no: generateKey(), text: "" },
-          { no: generateKey(), text: "" },
+          { id: "1", text: "选项1" },
+          { id: "2", text: "选项2" },
         ],
     };
     //默认多选题
     const currMultipleChoiceQues = {
-        no: generateKey(),
+        id: generateKey(),
         title: "",
         type: 1,
         remarks: null,
         isNecessary: false,
         option: [
-          { no: generateKey(), text: "" },
-          { no: generateKey(), text: "" },
+          { id: "1", text: "" },
+          { id: "2", text: "" },
         ],
     };
     //默认文本题
     const currTextQues = {
-        no: generateKey(),
+        id: generateKey(),
         type: 2,
         title: null,
         isNecessary: false,
