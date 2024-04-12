@@ -46,7 +46,7 @@ export const QuestionList = (props) => {
                 <div ref={provided.innerRef} {...provided.droppableProps}>
                     {questionList.map((questionItem, index) => {
                         return(
-                        <Draggable draggableId={questionItem.no} key={questionItem.no} index={index} isDragDisabled={disabled}>
+                        <Draggable draggableId={questionItem.id} key={questionItem.id} index={index} isDragDisabled={disabled}>
                         {provided => (
                             <div
                                 ref={provided.innerRef}
