@@ -5,44 +5,34 @@ import {
   CloseOutlined,
   UnorderedListOutlined,
 } from "@ant-design/icons";
-import { Input, Checkbox, Button, Form, Divider, Modal, message } from "antd";
+import { Input, Checkbox, Button, Form, Divider, message } from "antd";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import React, { useState } from "react";
 import BatchEditModal from "../BatchEditModal";
-
-let nextId = 3;
-
-const reorder = (list, startIndex, endIndex) => {
-  const result = Array.from(list);
-  const [removed] = result.splice(startIndex, 1);
-  result.splice(endIndex, 0, removed);
-
-  return result;
-};
+import { questionAdded, questionUpdated } from '../QuestionList/quesListSlice'
+import { 
+  titleUpdated, 
+  remarksUpdated,
+  isNecessaryUpdated,
+  optionAdded, 
+  optionDeleted, 
+  optionReordered,
+  optionUpdated,
+  singleChoiceCleared,
+  optionOtherAdded 
+} from "./singleSlice";
+import { editorStatusUpdated, editorTypeUpdated } from "../editStatusSlice";
+import { useSelector, useDispatch} from 'react-redux';
 
 export const SingleChoice = (props) => {
   const {
-    questionList,
-    setQuestionList,
-    editorStatus,
-    setEditorStatus,
-    editorType,
-    setEditorType,
-    currSingleChoiceQues,
     isUpdate,
     setIsUpdate
   } = props;
 
+  const singleChoice = useSelector(state => state.singleChoice)
+  const dispatch = useDispatch()
   const [form] = Form.useForm();
-  const [title, setTitle] = useState(currSingleChoiceQues.title);
-  const [remarks, setRemarks] = useState(currSingleChoiceQues.remarks);
-  const [option, setOption] = useState(
-    JSON.parse(JSON.stringify(currSingleChoiceQues.option))//深拷贝(option无需深拷贝)
-  );
-  const [isNecessary, setIsNecessary] = useState(currSingleChoiceQues.isNecessary);
-  const [hasRemarks, setHasRemarks] = useState(
-    currSingleChoiceQues.remarks === null ? false : true
-  );
   const [open, setOpen] = useState(false);//批量编辑Modal显示
   const [mutiOption, setMutiOption] = useState("");//批量编辑
 
@@ -53,93 +43,51 @@ export const SingleChoice = (props) => {
     if (result.destination.index === result.source.index) {
       return;
     }
-    let newOptions = reorder(
-      option,
-      result.source.index,
-      result.destination.index
-    );
-    setOption(newOptions);
+    dispatch(optionReordered({
+      startIndex: result.source.index,
+      endIndex: result.destination.index
+    }))
   }
 
-  function generateKey() {
-    return Number(Math.random().toString().slice(2, 7) + Date.now()).toString(36);
-  }
-
-  function generateId() {
-    return (nextId++).toString();
-  }
   const add = () => {
-    let newChoices = [...option, { id: generateId(), text: "" }];
-    return setOption(newChoices);
+    dispatch(optionAdded());
   };
   const del = (deleteId) => {
-    let newChoices = option.filter((item) => item.id !== deleteId);
-    return setOption(newChoices);
+    dispatch(optionDeleted(deleteId));
   };
   const addOther = () => {
-    let newChoices = [...option, { id: generateId(), text: "其他" }];
-    return setOption(newChoices);
-  };
-
-  const handleChange = (id, e) => {
-    let newChoices = option.map((item) => {
-      if (item.id === id) {
-        return { ...item, text: e.target.value };
-      }
-      return item;
-    })
-    setOption(newChoices);
+    dispatch(optionOtherAdded());
   };
 
   const onSubmit = () => {
-    const questionItem = {
-      id: currSingleChoiceQues.id,
-      type: currSingleChoiceQues.type,
-      title: title,
-      remarks: hasRemarks ? remarks : null,
-      isNecessary: isNecessary,
-      option: option,
-    };
-    if (isUpdate && questionItem === currSingleChoiceQues){
-      setEditorStatus("NotEdit");
-      setEditorType(null);
+    if(isUpdate){
+      dispatch(editorStatusUpdated("NotEdit"));
+      dispatch(editorTypeUpdated(null));
       setIsUpdate(false);
-      message.success("问卷并未修改")
-    }
-    else if(isUpdate && questionItem !== currSingleChoiceQues){
-      let newQuestionList = questionList.map((item) => {
-        if (item.id === questionItem.id) {
-          return questionItem;
-        }
-        return item;
-      })
-      setQuestionList(newQuestionList);
-      setEditorStatus("NotEdit");
-      setEditorType(null);
-      setIsUpdate(false);
+      dispatch(questionUpdated(singleChoice))
+      dispatch(singleChoiceCleared())
       message.success("问题修改成功")
     }
     else{
-      questionList.push(questionItem);
-      setQuestionList(questionList);
-      setEditorStatus("NotEdit");
-      setEditorType(null);
-      message.success("问题添加成功")
+      dispatch(editorStatusUpdated("NotEdit"));
+      dispatch(editorTypeUpdated(null));
+      dispatch(questionAdded(singleChoice))
+      dispatch(singleChoiceCleared())
+      message.success("问题添加成功");
     }
-
   };
   const Cancel = () => {
-    setEditorStatus("NotEdit");
-    setEditorType(null);
+    dispatch(editorStatusUpdated("NotEdit"));
+    dispatch(editorTypeUpdated(null));
+    dispatch(singleChoiceCleared())
     if (isUpdate) {
-      setQuestionList(questionList);
       setIsUpdate(false);
     }
   };
 
   const handleClick = () => {
     setOpen(true);
-    setMutiOption(option.map((item) => item.text).join("\n"));
+    setMutiOption(singleChoice.options.map((item) => item.text).join("\n"));
   }
   const handleCancel = () => {
     setOpen(false);
@@ -150,10 +98,9 @@ export const SingleChoice = (props) => {
       <EditorType >
         <span><CheckCircleOutlined style={{color: "#01bd78"}}/>&nbsp;单选题</span>
       </EditorType>
-      <Form form={form} name="quesionItem" onFinish={onSubmit} initialValues={{title: title}}>
+      <Form form={form} name="quesionItem" onFinish={onSubmit} initialValues={{title: singleChoice.title}}>
         <Form.Item 
-          name="title" 
-          value={title}
+          name="title"
           style={{margin: "16px 0", height: "40px"}}
           rules={[
             {
@@ -165,37 +112,37 @@ export const SingleChoice = (props) => {
         <EditorRowContent>
           <EditorRowTitle>题目</EditorRowTitle>
             <EditorInput
-              value={title}
+              value={singleChoice.title}
+              placeholder="请输入题目"
               onChange={(e) => {
-                setTitle(e.target.value);
+                dispatch(titleUpdated(e.target.value));
               }}
             />
         </EditorRowContent>
         </Form.Item>
-        <Form.Item name="remarks" style={{margin: "16px 0 8px 0", height: "40px"}}>
+        <Form.Item name="remarks" style={{margin: "20px 0 8px 0", height: "40px"}}>
             <EditorRowContent>
               <Checkbox 
                 style={{marginLeft: "40px"}}
-                checked={isNecessary}
+                checked={singleChoice.isNecessary}
                 onChange={(e) => {
-                  setIsNecessary(e.target.checked);
+                  dispatch(isNecessaryUpdated(e.target.checked))
                 }}>
                 必填
               </Checkbox>
               <Checkbox 
-                checked={hasRemarks}
+                checked={singleChoice.remarks === null ? false : true}
                 onChange={(e) => {
-                  setHasRemarks(e.target.checked);
+                  dispatch(remarksUpdated(e.target.checked ? "" : null))
                 }}
               >
                 备注
               </Checkbox>
-              {hasRemarks && (
+              {singleChoice.remarks === null ? false : true && (
                 <EditorInput
-                  // defaultValue={remarks}
-                  value={remarks}
+                  value={singleChoice.remarks}
                   onChange={(e) => {
-                    setRemarks(e.target.value);
+                    dispatch(remarksUpdated(e.target.value))
                   }}
                 />
                 )
@@ -207,7 +154,7 @@ export const SingleChoice = (props) => {
             {provided => (
               <div ref={provided.innerRef} {...provided.droppableProps}>
                 {
-                  option.map((item, index) => {
+                  singleChoice.options.map((item, index) => {
                     return(
                       <Draggable draggableId={item.id} key={item.id} index={index}>
                       {provided => (
@@ -223,7 +170,10 @@ export const SingleChoice = (props) => {
                             value={item.text}
                             placeholder="选项"
                             onChange={(e) => {
-                              handleChange(item.id, e);
+                              dispatch(optionUpdated({
+                                id: item.id,
+                                text: e.target.value
+                              }))
                             }}
                           />
                           <EditorRowTitle 
@@ -261,9 +211,8 @@ export const SingleChoice = (props) => {
               <a onClick={addOther} style={{marginLeft: 20, color: "#01bd78"}}>“其他”选项</a>
               <BatchEditModal 
                 open={open} 
-                onCancel={handleCancel} 
-                setOption={setOption} 
-                mutiOption={mutiOption} 
+                onCancel={handleCancel}
+                mutiOption={mutiOption}
                 setMutiOption={setMutiOption}/>
             </EditorRowContent>
         </Form.Item>
@@ -284,7 +233,6 @@ export const SingleChoice = (props) => {
               >
                 取消
               </Button>
-              {/* 防抖 */}
           </div>
         </Form.Item>
       </Form>
@@ -300,12 +248,10 @@ const EditerInner = styled.div`
   padding-top: 10px;
   margin-bottom: 20px;
   background: #eee;
-  // color: #666;
 `
 const EditorType = styled.div`
   font-size: 16px;
   text-align: left;
-  // background: skyblue;
 `;
 
 const EditorRowContent = styled.div`

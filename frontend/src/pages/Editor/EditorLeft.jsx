@@ -5,35 +5,34 @@ import {
   MinusSquareOutlined,
 } from "@ant-design/icons";
 import { Tabs, message } from "antd";
+import { useSelector, useDispatch} from 'react-redux';
+import { editorStatusUpdated, editorTypeUpdated } from '../../components/editStatusSlice';
 
 export const EditorLeft = (props) => {
-    const {
-        editorStatus,
-        setEditorStatus,
-        editorType,
-        setEditorType,
-    } = props;
+
+    const status = useSelector(state => state.editStatus)
+    const dispatch = useDispatch()
 
     const handleSingleChoiceClick= () => {
-        if (editorStatus === "NotEdit") {
-            setEditorType("SingleChoice");
-            setEditorStatus("Edit");
+        if (status.editorStatus === "NotEdit") {
+            dispatch(editorStatusUpdated("Edit"));
+            dispatch(editorTypeUpdated("SingleChoice"));
         } else {
             message.error("仍有问题未编辑完成...")
         }
     }
     const handleMultipleChoiceClick= () => {
-        if (editorStatus === "NotEdit") {
-            setEditorType("MultipleChoice");
-            setEditorStatus("Edit");
+        if (status.editorStatus === "NotEdit") {
+            dispatch(editorStatusUpdated("Edit"));
+            dispatch(editorTypeUpdated("MultipleChoice"));
         } else {
             message.error("仍有问题未编辑完成...")
           }
     }
     const handleSingleLineTextClick= () => {
-        if (editorStatus === "NotEdit") {
-            setEditorType("Text");
-            setEditorStatus("Edit");
+        if (status.editorStatus === "NotEdit") {
+            dispatch(editorStatusUpdated("Edit"));
+            dispatch(editorTypeUpdated("Text"));
         } else {
             message.error("仍有问题未编辑完成...")
         }

@@ -3,69 +3,45 @@ import styled from "@emotion/styled";
 import { useState, useEffect } from "react";
 import { DeleteOutlined, HighlightOutlined, CopyOutlined } from "@ant-design/icons";
 import DeleteModal from "../DeleteModal";
-
 import { SingleChoice } from "../SingleChoice/index";
+
+import { useSelector, useDispatch } from 'react-redux'
+import { questionDeleted, questionCopyed } from './quesListSlice'
+import { singleChoiceSetted } from '../SingleChoice/singleSlice'
+import { editorStatusUpdated } from '../editStatusSlice'
 
 export const SingleQuesItem = (props) => {
   const {
     ques_id,
     questionItem,
-    questionList,
-    setQuestionList,
-    editorStatus,
-    setEditorStatus,
-    editorType,
-    setEditorType,
-    // isUpdate,
-    // setIsUpdate,
-    disabled,
     SetDisabled,
   } = props;
   const [hovering, setHovering] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
 
-  const ques_option = Object.values(questionItem.option);
+  const dispatch = useDispatch();
+  const status = useSelector(state => state.editStatus)
 
   useEffect(() => {
-    if(isEdit && editorStatus==="Edit"){
-      message.error("仍有问题未编辑完成...")
-      setIsEdit(false);
-    }
-  },[editorStatus, isEdit])
-
-  useEffect(() => {
-    if(editorStatus==="NotEdit" && isEdit){
+    if(status.editorStatus==="Edit"){
+      // 编辑时所有问题禁止拖拽
       SetDisabled(true)
     }
-  },[editorStatus, isEdit])
+    else if(status.editorStatus==="NotEdit" && isEdit){
+      // 编辑中的问题禁止拖拽
+      SetDisabled(true)
+    }
+  },[status.editorStatus, isEdit])
 
   useEffect(() => {
-    if(!isEdit||editorStatus==="Edit"){
+    if(!isEdit && status.editorStatus==="NotEdit"){
       SetDisabled(false)
     }
-  },[editorStatus, isEdit])
-
-  function generateKey() {
-    return Number(Math.random().toString().slice(2, 7) + Date.now()).toString(36);
-  }
+  },[status.editorStatus, isEdit])
 
   const handleCopy = () => {
-    const newOptions = questionItem.option.map((item) => {
-      return { ...item, no: generateKey() };
-    })
-    const newQuestionItem = {
-      no: generateKey(),
-      type: questionItem.type,
-      title: questionItem.title,
-      remarks: questionItem.remarks,
-      isNecessary: questionItem.isNecessary,
-      option: newOptions
-    }
-    // questionList.push(newQuestionItem); // 无法立即渲染
-    // 修改原始数组，不会触发重新渲染
-    const newQuestionList = [...questionList, newQuestionItem];
-    setQuestionList(newQuestionList);
+    dispatch(questionCopyed(questionItem))
     message.success('复制成功')
   }
 
@@ -76,14 +52,11 @@ export const SingleQuesItem = (props) => {
     setOpenDelete(false)
   }
   const handleDelete = () => {
-    const newQuestionList = questionList.filter(
-      (ques) => ques !== questionItem
-    );
-    setQuestionList(newQuestionList);
+    dispatch(questionDeleted(questionItem.id))
   }
   return(
-      !isEdit||editorStatus==="Edit" ? (
-        <>
+      !isEdit ? (
+      <>
         <QuestionnaireItem
           onMouseEnter={() => {
             setHovering(true);
@@ -105,7 +78,7 @@ export const SingleQuesItem = (props) => {
             )}
               <Radio.Group defaultValue={null}>
                 <Space direction="vertical">
-                  {ques_option.map((choice, index) => {
+                  {questionItem.options.map((choice, index) => {
                     return (
                       <Radio key={index} value={choice}>
                         {choice.text}
@@ -119,6 +92,14 @@ export const SingleQuesItem = (props) => {
                 <HighlightOutlinedIcon
                   onClick={() => {
                     setIsEdit(true);
+                    if(status.editorStatus==="Edit"){
+                      message.error("仍有问题未编辑完成...")
+                      setIsEdit(false);
+                    }
+                    else{
+                      dispatch(editorStatusUpdated("Edit"));
+                      dispatch(singleChoiceSetted(questionItem));
+                    }
                   }}
                 />
                 <CopyOutlinedIcon 
@@ -138,24 +119,16 @@ export const SingleQuesItem = (props) => {
         
         
       </>
-        ) : (
-          <>
+      ) : (
+        <>
           <div style={{background: '#eee'}}>
-          <SingleChoice
-            questionList={questionList}
-            setQuestionList={setQuestionList}
-            editorStatus={editorStatus}
-            setEditorStatus={setEditorStatus}
-            editorType={editorType}
-            setEditorType={setEditorType}
-            currSingleChoiceQues={questionItem}
-            
-            isUpdate={isEdit}
-            setIsUpdate={setIsEdit}
-          />
-        </div>
+            <SingleChoice
+              isUpdate={isEdit}
+              setIsUpdate={setIsEdit}
+            />
+          </div>
         </>
-        )
+      )
   )
 };
 

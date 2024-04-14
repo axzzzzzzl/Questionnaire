@@ -6,59 +6,43 @@ import { Text } from "../Text";
 import DeleteModal from "../DeleteModal";
 const { TextArea } = Input;
 
+import { useDispatch, useSelector } from 'react-redux'
+import { questionDeleted, questionCopyed } from './quesListSlice'
+import { textSetted } from '../Text/textSlice'
+import { editorStatusUpdated } from '../editStatusSlice'
+
 export const TextItem = (props) => {
   const {
     ques_id,
     questionItem,
-    questionList,
-    setQuestionList,
-    editorStatus,
-    setEditorStatus,
-    editorType,
-    setEditorType,
-    // isUpdate,
-    // setIsUpdate,
-    disabled,
     SetDisabled,
   } = props;
   const [hovering, setHovering] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
 
-  useEffect(() => {
-    if(isEdit && editorStatus==="Edit"){
-      message.error("仍有问题未编辑完成...")
-      setIsEdit(false);
-    }
-  },[editorStatus, isEdit])
+  const dispatch = useDispatch();
+  const status = useSelector(state => state.editStatus)
 
   useEffect(() => {
-    if(editorStatus==="NotEdit" && isEdit){
+    if(status.editorStatus==="Edit"){
+      // 编辑时所有问题禁止拖拽
       SetDisabled(true)
     }
-  },[editorStatus, isEdit])
+    else if(status.editorStatus==="NotEdit" && isEdit){
+      // 编辑中的问题禁止拖拽
+      SetDisabled(true)
+    }
+  },[status.editorStatus, isEdit])
 
   useEffect(() => {
-    if(!isEdit||editorStatus==="Edit"){
+    if(!isEdit && status.editorStatus==="NotEdit"){
       SetDisabled(false)
     }
-  },[editorStatus, isEdit])
-
-  function generateKey() {
-    return Number(Math.random().toString().slice(2, 7) + Date.now()).toString(36);
-  }
+  },[status.editorStatus, isEdit])
 
   const handleCopy = () => {
-    const newQuestionItem = {
-      no: generateKey(),
-      type: questionItem.type,
-      title: questionItem.title,
-      remarks: questionItem.remarks,
-      isNecessary: questionItem.isNecessary,
-      lineHeight: questionItem.lineHeight
-    }
-    const newQuestionList = [...questionList, newQuestionItem];
-    setQuestionList(newQuestionList);
+    dispatch(questionCopyed(questionItem))
     message.success('复制成功')
   }
   const handleDeleteOk = () => {
@@ -68,14 +52,11 @@ export const TextItem = (props) => {
     setOpenDelete(false)
   }
   const handleDelete = () => {
-    const newQuestionList = questionList.filter(
-      (ques) => ques !== questionItem
-    );
-    setQuestionList(newQuestionList);
+    dispatch(questionDeleted(questionItem.id))
   }
   return(
-      !isEdit||editorStatus==="Edit" ? (
-        <>
+      !isEdit ? (
+      <>
         <QuestionnaireItem
           onMouseEnter={() => {
             setHovering(true);
@@ -104,6 +85,15 @@ export const TextItem = (props) => {
                 <HighlightOutlinedIcon
                   onClick={() => {
                     setIsEdit(true);
+                    if(status.editorStatus==="Edit"){
+                      message.error("仍有问题未编辑完成...")
+                      setIsEdit(false);
+                    }
+                    else{
+                      dispatch(editorStatusUpdated("Edit"));
+                      dispatch(textSetted(questionItem));
+                    }
+                      
                   }}
                 />
                 <CopyOutlinedIcon 
@@ -123,24 +113,16 @@ export const TextItem = (props) => {
         
         
       </>
-        ) : (
-          <>
-            <div style={{background: '#eee'}}>
-                <Text
-                    questionList={questionList}
-                    setQuestionList={setQuestionList}
-                    editorStatus={editorStatus}
-                    setEditorStatus={setEditorStatus}
-                    editorType={editorType}
-                    setEditorType={setEditorType}
-                    currTextQues={questionItem}
-                    
-                    isUpdate={isEdit}
-                    setIsUpdate={setIsEdit}
-                />
-            </div>
+      ) : (
+        <>
+          <div style={{background: '#eee'}}>
+              <Text
+                isUpdate={isEdit}
+                setIsUpdate={setIsEdit}
+              />
+          </div>
         </>
-        )
+      )
   )
 };
 

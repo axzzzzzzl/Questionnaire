@@ -9,39 +9,30 @@ import { Input, Checkbox, Button, Form, Divider, message } from "antd";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import React, { useState } from "react";
 import BatchEditModal from "../BatchEditModal";
-let nextId = 3;
-
-const reorder = (list, startIndex, endIndex) => {
-  const result = Array.from(list);
-  const [removed] = result.splice(startIndex, 1);
-  result.splice(endIndex, 0, removed);
-
-  return result;
-};
+import { useDispatch, useSelector } from 'react-redux'
+import { questionAdded, questionUpdated } from '../QuestionList/quesListSlice'
+import { 
+  titleUpdated, 
+  remarksUpdated,
+  isNecessaryUpdated,
+  optionAdded, 
+  optionDeleted, 
+  optionReordered,
+  optionUpdated,
+  multipleChoiceCleared,
+  optionOtherAdded 
+} from "./multipleSlice";
+import { editorStatusUpdated, editorTypeUpdated } from "../editStatusSlice";
 
 export const MultipleChoice = (props) => {
   const {
-    questionList,
-    setQuestionList,
-    editorStatus,
-    setEditorStatus,
-    editorType,
-    setEditorType,
-    currMultipleChoiceQues,
     isUpdate,
     setIsUpdate
   } = props;
 
+  const multipleChoice = useSelector(state => state.multipleChoice);
+  const dispatch = useDispatch()
   const [form] = Form.useForm();
-  const [title, setTitle] = useState(currMultipleChoiceQues.title);
-  const [remarks, setRemarks] = useState(currMultipleChoiceQues.remarks);
-  const [option, setOption] = useState(
-    JSON.parse(JSON.stringify(currMultipleChoiceQues.option))//深拷贝(option无需深拷贝)
-  );
-  const [isNecessary, setIsNecessary] = useState(currMultipleChoiceQues.isNecessary);
-  const [hasRemarks, setHasRemarks] = useState(
-    currMultipleChoiceQues.remarks === null ? false : true
-  );
   const [open, setOpen] = useState(false);//批量编辑Modal显示
   const [mutiOption, setMutiOption] = useState("");//批量编辑
 
@@ -52,93 +43,51 @@ export const MultipleChoice = (props) => {
     if (result.destination.index === result.source.index) {
       return;
     }
-    let newOptions = reorder(
-      option,
-      result.source.index,
-      result.destination.index
-    );
-    setOption(newOptions);
-  }
-
-  function generateKey() {
-    return Number(Math.random().toString().slice(2, 7) + Date.now()).toString(36);
+    dispatch(optionReordered({
+      startIndex: result.source.index,
+      endIndex: result.destination.index
+    }))
   }
 
   const add = () => {
-    let newChoices = [...option, { id: (nextId++).toString(), text: "" }];
-    form.setFieldsValue({ option: newChoices });
-    return setOption(newChoices);
+    dispatch(optionAdded());
   };
   const del = (deleteId) => {
-    let newChoices = option.filter((item) => item.id !== deleteId);
-    form.setFieldsValue({ option: newChoices });
-    return setOption(newChoices);
+    dispatch(optionDeleted(deleteId));
   };
   const addOther = () => {
-    let newChoices = [...option, { id: (nextId++).toString(), text: "其他" }];
-    form.setFieldsValue({ option: newChoices });
-    return setOption(newChoices);
-  };
-
-  const handleChange = (id, e) => {
-    let newChoices = option.map((item) => {
-      if (item.id === id) {
-        return { ...item, text: e.target.value };
-      }
-      return item;
-    })
-    setOption(newChoices);
+    dispatch(optionOtherAdded());
   };
 
   const onSubmit = () => {
-    const questionItem = {
-      id: currMultipleChoiceQues.id,
-      type: currMultipleChoiceQues.type,
-      title: title,
-      remarks: hasRemarks ? remarks : null,
-      isNecessary: isNecessary,
-      option: option,
-    };
-    if (isUpdate && questionItem === currMultipleChoiceQues){
-      setEditorStatus("NotEdit");
-      setEditorType(null);
+    if(isUpdate){
+      dispatch(editorStatusUpdated("NotEdit"));
+      dispatch(editorTypeUpdated(null));
       setIsUpdate(false);
-      message.success("问卷并未修改")
-    }
-    else if(isUpdate && questionItem !== currMultipleChoiceQues){
-      let newQuestionList = questionList.map((item) => {
-        if (item.id === questionItem.id) {
-          return questionItem;
-        }
-        return item;
-      })
-      setQuestionList(newQuestionList);
-      setEditorStatus("NotEdit");
-      setEditorType(null);
-      setIsUpdate(false);
+      dispatch(questionUpdated(multipleChoice))
+      dispatch(multipleChoiceCleared())
       message.success("问题修改成功")
     }
     else{
-      questionList.push(questionItem);
-      setQuestionList(questionList);
-      setEditorStatus("NotEdit");
-      setEditorType(null);
-      message.success("问题添加成功")
+      dispatch(editorStatusUpdated("NotEdit"));
+      dispatch(editorTypeUpdated(null));
+      dispatch(questionAdded(multipleChoice))
+      dispatch(multipleChoiceCleared())
+      message.success("问题添加成功");
     }
-
   };
   const Cancel = () => {
-    setEditorStatus("NotEdit");
-    setEditorType(null);
+    dispatch(editorStatusUpdated("NotEdit"));
+    dispatch(editorTypeUpdated(null));
+    dispatch(multipleChoiceCleared())
     if (isUpdate) {
-      setQuestionList(questionList);
       setIsUpdate(false);
     }
   };
 
   const handleClick = () => {
     setOpen(true);
-    setMutiOption(option.map((item) => item.text).join("\n"));
+    setMutiOption(multipleChoice.options.map((item) => item.text).join("\n"));
   }
   const handleCancel = () => {
     setOpen(false);
@@ -149,10 +98,9 @@ export const MultipleChoice = (props) => {
       <EditorType >
         <span><CheckSquareOutlined style={{color: "#01bd78"}}/>&nbsp;多选题</span>
       </EditorType>
-      <Form form={form} name="quesionItem" onFinish={onSubmit} initialValues={{title: title}}>
+      <Form form={form} name="quesionItem" onFinish={onSubmit} initialValues={{title: multipleChoice.title}}>
         <Form.Item 
-          name="title" 
-          value={title}
+          name="title"
           style={{margin: "16px 0", height: "40px"}}
           rules={[
             {
@@ -164,37 +112,36 @@ export const MultipleChoice = (props) => {
         <EditorRowContent>
           <EditorRowTitle>题目</EditorRowTitle>
             <EditorInput
-              value={title}
+              value={multipleChoice.title}
               onChange={(e) => {
-                setTitle(e.target.value);
+                dispatch(titleUpdated(e.target.value));
               }}
             />
         </EditorRowContent>
         </Form.Item>
-        <Form.Item name="remarks" style={{margin: "16px 0 8px 0", height: "40px"}}>
+        <Form.Item name="remarks" style={{margin: "20px 0 8px 0", height: "40px"}}>
             <EditorRowContent>
               <Checkbox 
                 style={{marginLeft: "40px"}}
-                checked={isNecessary}
+                checked={multipleChoice.isNecessary}
                 onChange={(e) => {
-                  setIsNecessary(e.target.checked);
+                  dispatch(isNecessaryUpdated(e.target.checked))
                 }}>
                 必填
               </Checkbox>
               <Checkbox 
-                checked={hasRemarks}
+                checked={multipleChoice.remarks === null ? false : true}
                 onChange={(e) => {
-                  setHasRemarks(e.target.checked);
+                  dispatch(remarksUpdated(e.target.checked ? "" : null))
                 }}
               >
                 备注
               </Checkbox>
-              {hasRemarks && (
+              {multipleChoice.remarks === null ? false : true && (
                 <EditorInput
-                  // defaultValue={remarks}
-                  value={remarks}
+                  value={multipleChoice.remarks}
                   onChange={(e) => {
-                    setRemarks(e.target.value);
+                    dispatch(remarksUpdated(e.target.value))
                   }}
                 />
                 )
@@ -206,7 +153,7 @@ export const MultipleChoice = (props) => {
             {provided => (
               <div ref={provided.innerRef} {...provided.droppableProps}>
                 {
-                  option.map((item, index) => {
+                  multipleChoice.options.map((item, index) => {
                     return(
                       <Draggable draggableId={item.id} key={item.id} index={index}>
                       {provided => (
@@ -222,7 +169,10 @@ export const MultipleChoice = (props) => {
                             value={item.text}
                             placeholder="选项"
                             onChange={(e) => {
-                              handleChange(item.id, e);
+                              dispatch(optionUpdated({
+                                id: item.id,
+                                text: e.target.value
+                              }))
                             }}
                           />
                           <EditorRowTitle 
@@ -230,7 +180,6 @@ export const MultipleChoice = (props) => {
                             <CloseOutlined style={{color: "#01bd78", fontSize: "20px"}}/>
                           </EditorRowTitle>
                         </EditorRowContentDND>
-                        // </Form.Item>
                       )}
                     </Draggable>
                     )
@@ -261,10 +210,10 @@ export const MultipleChoice = (props) => {
               <a onClick={addOther} style={{marginLeft: 20, color: "#01bd78"}}>“其他”选项</a>
               <BatchEditModal 
                 open={open} 
-                onCancel={handleCancel} 
-                setOption={setOption} 
+                onCancel={handleCancel}
                 mutiOption={mutiOption} 
-                setMutiOption={setMutiOption}/>
+                setMutiOption={setMutiOption}
+              />
             </EditorRowContent>
         </Form.Item>
         <Divider />

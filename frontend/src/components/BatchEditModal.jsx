@@ -1,22 +1,27 @@
 import React, { useState, useEffect } from 'react'
 import _ from "lodash";
 import { Modal, Input, Button } from 'antd';
+import { singleOptionBatchSetted } from './SingleChoice/singleSlice';
+import { multipleOptionBatchSetted } from './MultipleChoice/multipleSlice';
+import { useDispatch, useSelector } from 'react-redux'
 const { TextArea } = Input;
-let id = 1;
+
 const BatchEditModal = (props) => {
   const{
     open,
     onCancel,
-    setOption,
     mutiOption,
     setMutiOption,
   } = props;
 
+  const dispatch = useDispatch()
+  const status = useSelector(state => state.editStatus)
+
   const handleOk = () => {
-    let newChoices = mutiOption.split('\n').map((item) => {
-        return { id: `Batch-${(id++).toString()}`, text: item };
-    })
-    setOption(newChoices);
+    if(status.editorType === "SingleChoice")
+      dispatch(singleOptionBatchSetted(mutiOption));
+    else if(status.editorType === "MultipleChoice")
+      dispatch(multipleOptionBatchSetted(mutiOption));
     onCancel();
   }
   

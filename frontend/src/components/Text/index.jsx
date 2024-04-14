@@ -4,71 +4,50 @@ import {
 } from "@ant-design/icons";
 import { Input, Checkbox, Button, Form, Divider, message, InputNumber } from "antd";
 import React, { useState } from "react";
+import { questionAdded, questionUpdated } from '../QuestionList/quesListSlice'
+import { 
+  titleUpdated, 
+  remarksUpdated,
+  isNecessaryUpdated,
+  lineHeightUpdated,
+  textSetted,
+  textCleared
+} from './textSlice'
+import { editorStatusUpdated, editorTypeUpdated } from "../editStatusSlice";
+import { useSelector, useDispatch} from 'react-redux';
 
 export const Text = (props) => {
   const {
-    questionList,
-    setQuestionList,
-    editorStatus,
-    setEditorStatus,
-    editorType,
-    setEditorType,
-    currTextQues,
     isUpdate,
     setIsUpdate
   } = props;
 
+  const text = useSelector(state => state.text)
+  const dispatch = useDispatch()
   const [form] = Form.useForm();
-  const [title, setTitle] = useState(currTextQues.title);
-  const [remarks, setRemarks] = useState(currTextQues.remarks);
-  const [isNecessary, setIsNecessary] = useState(currTextQues.isNecessary);
-  const [hasRemarks, setHasRemarks] = useState(
-    currTextQues.remarks === null ? false : true
-  );
-  const [lineHeight, setLineHeight] = useState(currTextQues.lineHeight);
 
   const onSubmit = () => {
-    const questionItem = {
-      id: currTextQues.id,
-      type: currTextQues.type,
-      title: title,
-      remarks: hasRemarks ? remarks : null,
-      isNecessary: isNecessary,
-      lineHeight: lineHeight,
-    };
-    if (isUpdate && questionItem === currTextQues){
-      setEditorStatus("NotEdit");
-      setEditorType(null);
+    if(isUpdate){
+      dispatch(editorStatusUpdated("NotEdit"));
+      dispatch(editorTypeUpdated(null));
       setIsUpdate(false);
-      message.success("问卷并未修改")
-    }
-    else if(isUpdate && questionItem !== currTextQues){
-      let newQuestionList = questionList.map((item) => {
-        if (item.no === questionItem.no) {
-          return questionItem;
-        }
-        return item;
-      })
-      setQuestionList(newQuestionList);
-      setEditorStatus("NotEdit");
-      setEditorType(null);
-      setIsUpdate(false);
+      dispatch(questionUpdated(text))
+      dispatch(textCleared())
       message.success("问题修改成功")
     }
     else{
-      questionList.push(questionItem);
-      setQuestionList(questionList);
-      setEditorStatus("NotEdit");
-      setEditorType(null);
-      message.success("问题添加成功")
+      dispatch(editorStatusUpdated("NotEdit"));
+      dispatch(editorTypeUpdated(null));
+      dispatch(questionAdded(text))
+      dispatch(textCleared())
+      message.success("问题添加成功");
     }
-
   };
   const Cancel = () => {
-    setEditorStatus("NotEdit");
-    setEditorType(null);
+    dispatch(editorStatusUpdated("NotEdit"));
+    dispatch(editorTypeUpdated(null));
+    dispatch(textCleared())
     if (isUpdate) {
-      setQuestionList(questionList);
       setIsUpdate(false);
     }
   };
@@ -78,10 +57,9 @@ export const Text = (props) => {
       <EditorType >
         <span><MinusSquareOutlined style={{color: "#01bd78"}}/>&nbsp;文本题</span>
       </EditorType>
-      <Form form={form} name="quesionItem" onFinish={onSubmit} initialValues={{title: title}}>
+      <Form form={form} name="quesionItem" onFinish={onSubmit} initialValues={{title: text.title}}>
         <Form.Item 
           name="title" 
-          value={title}
           style={{margin: "16px 0", height: "40px"}}
           rules={[
             {
@@ -93,36 +71,36 @@ export const Text = (props) => {
         <EditorRowContent>
           <EditorRowTitle>题目</EditorRowTitle>
             <EditorInput
-              value={title}
+              value={text.title}
               onChange={(e) => {
-                setTitle(e.target.value);
+                dispatch(titleUpdated(e.target.value));
               }}
             />
         </EditorRowContent>
         </Form.Item>
-        <Form.Item name="remarks" style={{margin: "16px 0", height: "40px"}}>
+        <Form.Item name="remarks" style={{margin: "20px 0 16px", height: "40px"}}>
             <EditorRowContent>
               <Checkbox 
                 style={{marginLeft: "40px"}}
-                checked={isNecessary}
+                checked={text.isNecessary}
                 onChange={(e) => {
-                  setIsNecessary(e.target.checked);
+                  dispatch(isNecessaryUpdated(e.target.checked))
                 }}>
                 必填
               </Checkbox>
               <Checkbox 
-                checked={hasRemarks}
+                checked={text.remarks === null ? false : true}
                 onChange={(e) => {
-                  setHasRemarks(e.target.checked);
+                  dispatch(remarksUpdated(e.target.checked ? "" : null))
                 }}
               >
                 备注
               </Checkbox>
-              {hasRemarks && (
+              {text.remarks === null ? false : true && (
                 <EditorInput
-                  value={remarks}
+                  value={text.remarks}
                   onChange={(e) => {
-                    setRemarks(e.target.value);
+                    dispatch(remarksUpdated(e.target.value))
                   }}
                 />
                 )
@@ -133,11 +111,11 @@ export const Text = (props) => {
             <EditorRowContent>
               <EditorLineHeight>文本框高度</EditorLineHeight>
               <InputNumber 
-                value={lineHeight}
+                value={text.lineHeight}
                 min={1} 
                 max={10}
                 onChange={(value) => {
-                  setLineHeight(value);
+                  dispatch(lineHeightUpdated(value))
                 }}
                 style={{width: "80px"}}
               />

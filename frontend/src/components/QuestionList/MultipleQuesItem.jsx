@@ -6,63 +6,43 @@ import { DeleteOutlined, HighlightOutlined, CopyOutlined } from "@ant-design/ico
 import { MultipleChoice } from "../MultipleChoice";
 import DeleteModal from "../DeleteModal";
 
+import { useSelector, useDispatch } from 'react-redux'
+import { questionDeleted, questionCopyed } from './quesListSlice'
+import { multipleChoiceSetted } from '../MultipleChoice/multipleSlice'
+import { editorStatusUpdated } from '../editStatusSlice'
+
 export const MultipleQuesItem = (props) => {
   const {
     ques_id,
     questionItem,
-    questionList,
-    setQuestionList,
-    editorStatus,
-    setEditorStatus,
-    editorType,
-    setEditorType,
-    // isUpdate,
-    // setIsUpdate,
-    disabled,
     SetDisabled,
   } = props;
   const [hovering, setHovering] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
 
-  const ques_option = Object.values(questionItem.option);
+  const dispatch = useDispatch();
+  const status = useSelector(state => state.editStatus)
 
   useEffect(() => {
-    if(isEdit && editorStatus==="Edit"){
-      message.error("仍有问题未编辑完成...")
-      setIsEdit(false);
-    }
-  },[editorStatus, isEdit])
-
-  useEffect(() => {
-    if(editorStatus==="NotEdit" && isEdit){
+    if(status.editorStatus==="Edit"){
+      // 编辑时所有问题禁止拖拽
       SetDisabled(true)
     }
-  },[editorStatus, isEdit])
+    else if(status.editorStatus==="NotEdit" && isEdit){
+      // 编辑中的问题禁止拖拽
+      SetDisabled(true)
+    }
+  },[status.editorStatus, isEdit])
 
   useEffect(() => {
-    if(!isEdit||editorStatus==="Edit"){
+    if(!isEdit && status.editorStatus==="NotEdit"){
       SetDisabled(false)
     }
-  },[editorStatus, isEdit])
+  },[status.editorStatus, isEdit])
 
-  function generateKey() {
-    return Number(Math.random().toString().slice(2, 7) + Date.now()).toString(36);
-  }
   const handleCopy = () => {
-    const newOptions = questionItem.option.map((item) => {
-      return { ...item, no: generateKey() };
-    })
-    const newQuestionItem = {
-      no: generateKey(),
-      type: questionItem.type,
-      title: questionItem.title,
-      remarks: questionItem.remarks,
-      isNecessary: questionItem.isNecessary,
-      option: newOptions
-    }
-    const newQuestionList = [...questionList, newQuestionItem];
-    setQuestionList(newQuestionList);
+    dispatch(questionCopyed(questionItem))
     message.success('复制成功')
   }
   const handleDeleteOk = () => {
@@ -72,14 +52,11 @@ export const MultipleQuesItem = (props) => {
     setOpenDelete(false)
   }
   const handleDelete = () => {
-    const newQuestionList = questionList.filter(
-      (ques) => ques !== questionItem
-    );
-    setQuestionList(newQuestionList);
+    dispatch(questionDeleted(questionItem.id))
   }
   return(
-      !isEdit||editorStatus==="Edit" ? (
-        <>
+      !isEdit ? (
+      <>
         <QuestionnaireItem
           onMouseEnter={() => {
             setHovering(true);
@@ -101,7 +78,7 @@ export const MultipleQuesItem = (props) => {
             )}
               <Checkbox.Group >
                 <Space direction="vertical">
-                  {ques_option.map((choice, index) => {
+                  {questionItem.options.map((choice, index) => {
                     return (
                       <Checkbox key={index} value={choice} >
                         {choice.text}
@@ -115,6 +92,15 @@ export const MultipleQuesItem = (props) => {
               <HighlightOutlinedIcon
                 onClick={() => {
                   setIsEdit(true);
+                  if(status.editorStatus==="Edit"){
+                    message.error("仍有问题未编辑完成...")
+                    setIsEdit(false);
+                  }
+                  else{
+                    dispatch(editorStatusUpdated("Edit"));
+                    dispatch(multipleChoiceSetted(questionItem));
+                  }
+                    
                 }}
               />
               <CopyOutlinedIcon 
@@ -131,27 +117,17 @@ export const MultipleQuesItem = (props) => {
             </SubjectControlBar>
           <div style={{width: "90%", margin: "0 auto"}}><Divider /></div>
         </QuestionnaireItem>
-        
-        
       </>
-        ) : (
-          <>
+      ) : (
+        <>
           <div style={{background: '#eee'}}>
-          <MultipleChoice
-            questionList={questionList}
-            setQuestionList={setQuestionList}
-            editorStatus={editorStatus}
-            setEditorStatus={setEditorStatus}
-            editorType={editorType}
-            setEditorType={setEditorType}
-            currMultipleChoiceQues={questionItem}
-            
-            isUpdate={isEdit}
-            setIsUpdate={setIsEdit}
-          />
-        </div>
+            <MultipleChoice
+              isUpdate={isEdit}
+              setIsUpdate={setIsEdit}
+            />
+          </div>
         </>
-        )
+      )
   )
 };
 
