@@ -1,6 +1,6 @@
 import { Input, Divider, message, Popconfirm } from "antd";
 import styled from "@emotion/styled";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { DeleteOutlined, HighlightOutlined, CopyOutlined } from "@ant-design/icons";
 import { Text } from "../Text";
 import DeleteModal from "../DeleteModal";
@@ -23,6 +23,17 @@ export const TextItem = (props) => {
 
   const dispatch = useDispatch();
   const status = useSelector(state => state.editStatus)
+
+  const listRef = useRef(0);
+  useEffect(() => {
+    if(isEdit){
+      listRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'nearest'
+      });
+    }
+  },[isEdit])
 
   useEffect(() => {
     if(status.editorStatus==="Edit"){
@@ -92,6 +103,7 @@ export const TextItem = (props) => {
                     else{
                       dispatch(editorStatusUpdated("Edit"));
                       dispatch(textSetted(questionItem));
+                      setHovering(false);
                     }
                       
                   }}
@@ -115,7 +127,7 @@ export const TextItem = (props) => {
       </>
       ) : (
         <>
-          <div style={{background: '#eee'}}>
+          <div style={{background: '#eee'}} ref={listRef}>
               <Text
                 isUpdate={isEdit}
                 setIsUpdate={setIsEdit}

@@ -24,7 +24,7 @@ const reorder = (list, startIndex, endIndex) => {
     return result;
 };
 
-const singleChoiceSlice = createSlice({
+const singleChoiceSlice = createSlice({ // 使用了Immer库
     name: 'singleChoice',
     initialState,
     reducers: {

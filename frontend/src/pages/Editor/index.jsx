@@ -24,18 +24,10 @@ export const Editor = () => {
     const status = useSelector(state => state.editStatus)
 
     useEffect(() => {
-      if(status.editorType === "SingleChoice"){
-        const current = listRef.current;
-        current.scrollTop = current.scrollHeight;
-      }
-      else if(status.editorType === "MultipleChoice"){
-        const current = listRef.current;
-        current.scrollTop = current.scrollHeight;
-      }
-      else if(status.editorType === "Text"){
-        const current = listRef.current;
-        current.scrollTop = current.scrollHeight;
-      }
+      listRef.current.scroll({
+        top: listRef.current.scrollHeight,
+        behavior: 'auto',
+      })
     },[status.editorType])
 
     const handleCancel = () => {
@@ -94,7 +86,7 @@ export const Editor = () => {
 }
 
 const MiddleContent = styled(Content)`
-  overflow: auto;
+  overflow-y: auto;
   margin: 16px 0px 0px 16px;
   background: white;
   box-shadow: 0 3px 4px 0 grey;
