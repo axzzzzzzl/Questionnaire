@@ -9,7 +9,7 @@ import { useSelector } from 'react-redux';
 
 export const QuestionList = (props) => {
 
-  const [disabled, SetDisabled] = useState(false);
+  const [disabled, setDisabled] = useState(false);
   const dispatch = useDispatch();
   const questionnaire = useSelector(state => state.questionnaire.questions)
 
@@ -43,21 +43,21 @@ export const QuestionList = (props) => {
                         <SingleQuesItem
                           ques_id={index+1}
                           questionItem={questionItem}
-                          SetDisabled={SetDisabled}
+                          setDisabled={setDisabled}
                         />
                       }
                       {questionItem.type === 1 && 
                         <MultipleQuesItem
                           ques_id={index+1}
                           questionItem={questionItem}
-                          SetDisabled={SetDisabled}
+                          setDisabled={setDisabled}
                         />
                       }
                       {questionItem.type === 2 && 
                         <TextItem
                           ques_id={index+1}
                           questionItem={questionItem}
-                          SetDisabled={SetDisabled}
+                          setDisabled={setDisabled}
                         />
                       }
                     </div>

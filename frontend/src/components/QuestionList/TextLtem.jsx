@@ -15,7 +15,7 @@ export const TextItem = (props) => {
   const {
     ques_id,
     questionItem,
-    SetDisabled,
+    setDisabled,
   } = props;
   const [hovering, setHovering] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
@@ -24,7 +24,7 @@ export const TextItem = (props) => {
   const dispatch = useDispatch();
   const status = useSelector(state => state.editStatus)
 
-  const listRef = useRef(0);
+  const listRef = useRef(null);
   useEffect(() => {
     if(isEdit){
       listRef.current.scrollIntoView({
@@ -38,19 +38,25 @@ export const TextItem = (props) => {
   useEffect(() => {
     if(status.editorStatus==="Edit"){
       // 编辑时所有问题禁止拖拽
-      SetDisabled(true)
+      setDisabled(true)
     }
-    else if(status.editorStatus==="NotEdit" && isEdit){
-      // 编辑中的问题禁止拖拽
-      SetDisabled(true)
+    else {
+      setDisabled(false)
     }
-  },[status.editorStatus, isEdit])
+  },[status.editorStatus])
 
-  useEffect(() => {
-    if(!isEdit && status.editorStatus==="NotEdit"){
-      SetDisabled(false)
+  const handleEdit = () => {
+    setIsEdit(true);
+    if(status.editorStatus==="Edit"){
+      message.error("仍有问题未编辑完成...")
+      setIsEdit(false);
     }
-  },[status.editorStatus, isEdit])
+    else{
+      dispatch(editorStatusUpdated("Edit"));
+      dispatch(textSetted(questionItem));
+      setHovering(false);
+    }
+  }
 
   const handleCopy = () => {
     dispatch(questionCopyed(questionItem))
@@ -94,19 +100,7 @@ export const TextItem = (props) => {
             </QuestionnaireSubjectInner>
               <SubjectControlBar style={{transform: hovering ? "translateX(0)" : ""}}>
                 <HighlightOutlinedIcon
-                  onClick={() => {
-                    setIsEdit(true);
-                    if(status.editorStatus==="Edit"){
-                      message.error("仍有问题未编辑完成...")
-                      setIsEdit(false);
-                    }
-                    else{
-                      dispatch(editorStatusUpdated("Edit"));
-                      dispatch(textSetted(questionItem));
-                      setHovering(false);
-                    }
-                      
-                  }}
+                  onClick={handleEdit}
                 />
                 <CopyOutlinedIcon 
                   onClick={handleCopy}
