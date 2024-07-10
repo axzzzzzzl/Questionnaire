@@ -177,7 +177,7 @@ export const MultipleChoice = (props) => {
                           />
                           <EditorRowTitle 
                             onClick={() => del(item.id)}>
-                            <CloseOutlined style={{color: "#01bd78", fontSize: "20px"}}/>
+                            <CloseOutlined style={{color: "#01bd78", fontSize: "20px", cursor: "pointer"}}/>
                           </EditorRowTitle>
                         </EditorRowContentDND>
                       )}
@@ -223,13 +223,13 @@ export const MultipleChoice = (props) => {
               <Button 
                 htmlType="submit" 
                 type="primary" 
-                style={{marginRight: "10px", height: "40px", width: "10vw", minWidth: "60px"}}
+                style={{marginRight: "10px", height: "40px", width: "20%", minWidth: "60px"}}
               >
                 确定
               </Button>
               <Button 
                 onClick={Cancel} 
-                style={{marginLeft: "10px", height: "40px", width: "10vw", minWidth: "60px"}}
+                style={{marginLeft: "10px", height: "40px", width: "20%", minWidth: "60px"}}
               >
                 取消
               </Button>
@@ -244,7 +244,8 @@ export const MultipleChoice = (props) => {
 const EditerInner = styled.div`
   box-sizing: border-box;
   user-select: none;
-  width: 700px;
+  width: 85%;
+  max-width: 700px;
   margin: 0 auto;
   padding-top: 10px;
   margin-bottom: 20px;

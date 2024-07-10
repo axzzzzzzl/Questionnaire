@@ -15,12 +15,17 @@ const editStatusSlice = createSlice({
         editorTypeUpdated: (state, action) => {
             state.editorType = action.payload
         },
+        editorStatusCleared: (state) => {
+            state.editorType = null
+            state.editorStatus = "NotEdit"
+        }
     }
 })
 
 export const { 
     editorStatusUpdated, 
     editorTypeUpdated,
+    editorStatusCleared
  } = editStatusSlice.actions
   
 export default editStatusSlice.reducer

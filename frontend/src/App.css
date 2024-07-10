@@ -1,4 +1,12 @@
-* {
+
+html, body{
+  font-size: 62.5%; /* 10px */
+  height: 100%;
+  width: 100%;
   margin: 0;
   padding: 0;
+}
+
+#root{
+  height: 100%;
 }

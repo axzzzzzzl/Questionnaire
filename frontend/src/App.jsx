@@ -1,18 +1,14 @@
 import './App.css';
 import React from "react";
-import { Editor } from './pages/Editor';
-import { Route, Routes } from 'react-router-dom';
+
+import { RouterProvider } from "react-router-dom";
+import { router } from './routes'
+
 
 function App() {
   return(
-    <Routes>
-      <Route path="/Questionnaire/" element={<Editor />} />
-      <Route path="/Questionnaire/hello" element={<Hello />} />
-    </Routes>
+    <RouterProvider router={router} />
   )
-}
-const Hello = () => {
-  return <div>Hello React</div>
 }
 
 export default App;

@@ -12,7 +12,6 @@ export const QuestionList = (props) => {
   const [disabled, setDisabled] = useState(false);
   const dispatch = useDispatch();
   const questionnaire = useSelector(state => state.questionnaire.questions)
-
   function onDragEnd(result) {
     if (!result.destination) {
       return;

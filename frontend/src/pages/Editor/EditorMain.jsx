@@ -1,21 +1,53 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Input, Divider, ConfigProvider } from "antd";
+import { Input, Divider, ConfigProvider, message } from "antd";
 import { EditFilled } from "@ant-design/icons";
 import styled from "@emotion/styled";
+import { useLocation, useNavigate } from "react-router-dom";
 import { QuestionList } from "../../components/QuestionList";
 import { SingleChoice } from "../../components/SingleChoice";
 import { MultipleChoice } from "../../components/MultipleChoice";
 import { Text } from "../../components/Text";
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux'
-import { titleUpdated, descriptionUpdated } from "../../components/QuestionList/quesListSlice";
+import { titleUpdated, descriptionUpdated, questionnaireSetted, questionnaireCleared } from "../../components/QuestionList/quesListSlice";
+import { editorStatusCleared } from "../../components/editStatusSlice";
 const { TextArea } = Input;
+import { get } from "../../services/axios";
 
 export const EditorMain = (props) => {
 
     const questionnaire = useSelector(state => state.questionnaire)
     const status = useSelector(state => state.editStatus)
     const dispatch = useDispatch()
+
+    const location = useLocation();
+    const arr = location.pathname.split("/");
+    const id = arr[arr.length - 1] === "create" ? null : arr[arr.length - 2];
+
+    const navigate = useNavigate()
+
+    useEffect(() => {
+      dispatch(editorStatusCleared())
+      let questionnaireInfo;
+      if(id){
+        get("/questionnaire/find", { id }).then((res) => {
+          questionnaireInfo = res.data.data.result 
+          if(questionnaireInfo){
+            message.success('问卷获取成功!')
+            dispatch(questionnaireSetted( questionnaireInfo ))
+          }
+          else{
+            message.error('该问卷不存在!')
+            setTimeout(() => {
+              navigate('/Questionnaire/')
+            },500)
+          }
+        })
+      }
+      else{
+        dispatch(questionnaireCleared())
+      }
+    }, [])
 
     return (
       <>
@@ -91,7 +123,7 @@ const QuestionnaireDescription = styled.div`
   }
 `;
 const InputTitle = styled(Input)`
-  width: 700px;
+  width: 80%;
   height: 45px;
   text-align: center;
   font-size: 20px;
@@ -100,7 +132,7 @@ const InputTitle = styled(Input)`
   color: #01bd78;
 `;
 const InputDescription = styled(TextArea)`
-  width: 900px;
+  width: 95%;
   font-size: 16px;
   border-radius: 2px;
 `;

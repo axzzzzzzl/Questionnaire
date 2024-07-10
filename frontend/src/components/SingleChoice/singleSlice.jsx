@@ -10,8 +10,8 @@ const initialState = {
         { id: "1", text: "选项1" },
         { id: "2", text: "选项2" },
     ],
+    nextId: 3,
 }
-let nextId = 3;
 
 function generateId() {
     return Number(Math.random().toString().slice(3, 8) + Date.now()).toString(36);
@@ -41,19 +41,20 @@ const singleChoiceSlice = createSlice({ // 使用了Immer库
             state.options = state.options.map(option => option.id === action.payload.id ? action.payload : option)
         },
         optionAdded: (state) => {
-            state.options.push({ id: (nextId++).toString(), text: "" })
+            state.options.push({ id: (state.nextId++).toString(), text: "" })
         },
         optionOtherAdded: (state) => {
-            state.options.push({ id: (nextId++).toString(), text: "其他" })
+            state.options.push({ id: (state.nextId++).toString(), text: "其他" })
         },
         optionDeleted: (state, action) => {
             state.options = state.options.filter(option => option.id !== action.payload)
+            state.nextId--
         },
         optionReordered: (state, action) => {
             state.options = reorder(state.options, action.payload.startIndex, action.payload.endIndex)
         },
         singleOptionBatchSetted: (state, action) => {
-            state.options = action.payload.split('\n').map(option => ({ id: (nextId++).toString(), text: option }))
+            state.options = action.payload.split('\n').map(option => ({ id: (state.nextId++).toString(), text: option }))
         },
         singleChoiceSetted: (state, action) => {
             return {

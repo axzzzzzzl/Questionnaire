@@ -44,6 +44,18 @@ const questionnaireSlice = createSlice({
         questionCopyed: (state, action) => {
             state.questions.push({...action.payload, id: generateId()})
         },
+        questionnaireSetted: (state, action) => {
+            state.title = action.payload.title
+            state.description = action.payload.description
+            state.id = action.payload.id
+            state.questions = action.payload.questions
+        },
+        questionnaireCleared: (state) => {
+            state.title = ""
+            state.description = ""
+            state.id = generateId()
+            state.questions = []
+        }
     }
   })
   
@@ -54,7 +66,9 @@ const questionnaireSlice = createSlice({
     questionReordered, 
     questionCopyed,
     titleUpdated,
-    descriptionUpdated
+    descriptionUpdated,
+    questionnaireSetted,
+    questionnaireCleared
  } = questionnaireSlice.actions
   
   export default questionnaireSlice.reducer

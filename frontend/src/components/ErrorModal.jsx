@@ -22,9 +22,9 @@ const ErrorModal = (props) => {
             <Button type="primary" onClick={onCancel}>确定</Button>,
           ]}
           >
-            <br />
+            {/* <br /> */}
             <div>{errorInfo}</div>
-            <br />
+            {/* <br /> */}
         </Modal>
         </ConfigProvider>
     )

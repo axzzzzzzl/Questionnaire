@@ -43,15 +43,36 @@ export const EditorLeft = (props) => {
             label: "问题控件",
             children:(
                 <div style={{display: 'flex', flexDirection: 'column'}}>
-                    <Btn onClick={handleSingleChoiceClick}><CheckCircleOutlined />&nbsp;单选题</Btn>
-                    <Btn onClick={handleMultipleChoiceClick}><CheckSquareOutlined />&nbsp;多选题</Btn>
-                    <Btn onClick={handleSingleLineTextClick}><MinusSquareOutlined />&nbsp;文本题</Btn>
+                    <Btn 
+                        onClick={handleSingleChoiceClick}
+                        style={{ 
+                            background: status.editorType === "SingleChoice" && "#34ca93",
+                            color: status.editorType === "SingleChoice" && "white",
+                            borderWidth: status.editorType === "SingleChoice" && "3px",
+                        }}
+                    ><CheckCircleOutlined />&nbsp;单选题</Btn>
+                    <Btn 
+                        onClick={handleMultipleChoiceClick}
+                        style={{ 
+                            background: status.editorType === "MultipleChoice" && "#34ca93",
+                            color: status.editorType === "MultipleChoice" && "white",
+                            borderWidth: status.editorType === "MultipleChoice" && "3px",
+                        }}
+                    ><CheckSquareOutlined />&nbsp;多选题</Btn>
+                    <Btn 
+                        onClick={handleSingleLineTextClick}
+                        style={{ 
+                            background: status.editorType === "Text" && "#34ca93",
+                            color: status.editorType === "Text" && "white",
+                            borderWidth: status.editorType === "Text" && "3px",
+                        }}
+                    ><MinusSquareOutlined />&nbsp;文本题</Btn>
                 </div>
             )
         },
         {
             key: "2",
-            label: "问题大纲",
+            label: "问卷设置",
             children:(
                 <div style={{textAlign: 'center', color: "#01bd78"}}>正在实现中...</div>
             )
@@ -67,9 +88,9 @@ export const EditorLeft = (props) => {
 
 const Left = styled.div`
   border: 1px solid #eee;
-  margin: 16px;
-  height: 95vh;
-  min-height: 600px;
+  height: 100%;
+  width: 100%;
+//   min-height: 600px;
   background: white;
   box-shadow: 0 3px 4px 0 grey;
   user-select: none;

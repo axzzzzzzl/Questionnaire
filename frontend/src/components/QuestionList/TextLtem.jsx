@@ -95,24 +95,30 @@ export const TextItem = (props) => {
             )}
             <TextArea
               autoSize={{ minRows: questionItem.lineHeight, maxRows: questionItem.lineHeight }}
-              style={{width: "80%"}}
+              style={{width: "75%"}}
             />
             </QuestionnaireSubjectInner>
               <SubjectControlBar style={{transform: hovering ? "translateX(0)" : ""}}>
-                <HighlightOutlinedIcon
-                  onClick={handleEdit}
-                />
-                <CopyOutlinedIcon 
-                  onClick={handleCopy}
-                />
-                <DeleteOutlinedIcon
-                  onClick={handleDeleteOk}
-                />
-                <DeleteModal 
-                  open={openDelete} 
-                  onCancel={handleCancel}
-                  handleDelete={handleDelete}
-                />
+                <IconBar>
+                  <HighlightOutlinedIcon
+                    onClick={handleEdit}
+                  />
+                </IconBar>
+                <IconBar>
+                  <CopyOutlinedIcon
+                    onClick={handleCopy}
+                  />
+                </IconBar>
+                <IconBar>
+                  <DeleteOutlinedIcon
+                    onClick={handleDeleteOk}
+                  />
+                  <DeleteModal 
+                    open={openDelete} 
+                    onCancel={handleCancel}
+                    handleDelete={handleDelete}
+                  />
+                </IconBar>
               </SubjectControlBar>
           <div style={{width: "90%", margin: "0 auto"}}><Divider /></div>
         </QuestionnaireItem>
@@ -146,10 +152,11 @@ const QuestionnaireItem = styled.div`
 `;
 
 const QuestionnaireSubjectInner = styled.div`
-  width: 700px;
+  width: 900px;
   margin: 0 auto;
   // background: skyblue;
   z-index: 2;
+  padding-left: 30px;
 `;
 
 const SubjectRow = styled.div`
@@ -166,7 +173,7 @@ const SubjectControlBar = styled.div`
   right: 0px;
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
+  justify-content: center;
   align-items: center;
   transform: translateX(100%);
   transition: transform .2s;
@@ -201,4 +208,11 @@ const CopyOutlinedIcon = styled(CopyOutlined)`
   &:hover{
     color: #01bd78;
   }
+`;
+const IconBar = styled.div`
+  width: 50px;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
