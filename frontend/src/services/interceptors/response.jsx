@@ -31,6 +31,6 @@ export const tokenJudgeConfig = (instance) => {
         }
       }
     },
-    (error) => new Error(error)
+    (err) => Promise.reject(err)
   )
 }
