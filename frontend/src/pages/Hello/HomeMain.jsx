@@ -36,7 +36,7 @@ export const HomeMain = (props) => {
             </TemplateTitle>
             <TemplateContent>
                 <TemplateCard
-                    cover={<img alt="template1" src={ template1 } style={{height: "110px"}} />}
+                    cover={<TemplateImg alt="template1" src={ template1 } />}
                     hoverable
                     styles={{body: {padding: "0"}}}
                     // onClick={() => alert("模板1")}
@@ -44,28 +44,28 @@ export const HomeMain = (props) => {
                     <h4 style={{margin: "8px 0"}}>收集应聘简历</h4>
                 </TemplateCard>
                 <TemplateCard
-                    cover={<img alt="template2" src={ template2 } style={{height: "110px"}} />}
+                    cover={<TemplateImg alt="template2" src={ template2 } />}
                     hoverable
                     styles={{body: {padding: "0"}}}
                 >
                     <h4 style={{margin: "8px 0"}}>签到考勤表</h4>
                 </TemplateCard>
                 <TemplateCard
-                    cover={<img alt="template3" src={ template3 } style={{height: "110px"}} />}
+                    cover={<TemplateImg alt="template3" src={ template3 } />}
                     hoverable
                     styles={{body: {padding: "0"}}}
                 >
                     <h4 style={{margin: "8px 0"}}>大学生心理健康调查问卷</h4>
                 </TemplateCard>
                 <TemplateCard
-                    cover={<img alt="template4" src={ template4 } style={{height: "110px"}} />}
+                    cover={<TemplateImg alt="template4" src={ template4 } />}
                     hoverable
                     styles={{body: {padding: "0"}}}
                 >
                     <h4 style={{margin: "8px 0"}}>大学生消费情况调查问卷</h4>
                 </TemplateCard>
                 <TemplateCard
-                    cover={<img alt="template5" src={ template5 } style={{height: "110px"}} />}
+                    cover={<TemplateImg alt="template5" src={ template5 } />}
                     hoverable
                     styles={{body: {padding: "0"}}}
                 >
@@ -184,4 +184,8 @@ const TemplateCard = styled(Card)`
             margin-right: 0;
         }
     }
+`
+const TemplateImg = styled.img`
+    height: 110px;
+    object-fit: cover;
 `
